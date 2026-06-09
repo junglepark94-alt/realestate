@@ -1,20 +1,4 @@
-import { useState, useEffect } from 'react';
-import { fetchListings } from '../api';
-
-function ListingTable({ aptId, aptName }) {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    fetchListings(aptId)
-      .then((d) => setListings(d.listings || []))
-      .catch(() => { setListings([]); setError(true); })
-      .finally(() => setLoading(false));
-  }, [aptId]);
-
+function ListingTable({ aptName, listings, loading, error }) {
   if (loading) return <div className="card loading">매물 로딩중...</div>;
   if (error) return (
     <div className="card">
@@ -25,9 +9,9 @@ function ListingTable({ aptId, aptName }) {
 
   return (
     <div className="card">
-      <h3>🏠 {aptName} 현재 매물 ({listings.length}건)</h3>
+      <h3>🏠 {aptName} 매매/전세 매물 ({listings.length}건)</h3>
       {listings.length === 0 ? (
-        <p className="empty-text">현재 등록된 매물이 없습니다</p>
+        <p className="empty-text">해당 면적의 매매/전세 매물이 없습니다</p>
       ) : (
         <table>
           <thead>
@@ -44,7 +28,7 @@ function ListingTable({ aptId, aptName }) {
             {listings.map((l) => (
               <tr key={l.articleNo}>
                 <td>
-                  <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : l.tradeType === '전세' ? 'lease' : 'rent'}`}>
+                  <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : 'lease'}`}>
                     {l.tradeType}
                   </span>
                 </td>

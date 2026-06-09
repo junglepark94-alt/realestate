@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { fetchApartments } from '../api';
+import { useState, useEffect, useMemo } from 'react';
+import { fetchApartments, fetchTransactions, fetchListings } from '../api';
+import { getAreaType, extractAreaTypes } from '../utils/areaType';
 import ApartmentCard from './ApartmentCard';
 import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
@@ -9,6 +10,17 @@ function Dashboard() {
   const [selectedApt, setSelectedApt] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Data states (lifted from children)
+  const [txData, setTxData] = useState(null);
+  const [txLoading, setTxLoading] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [listingsLoading, setListingsLoading] = useState(false);
+  const [listingsError, setListingsError] = useState(false);
+
+  // Area filter
+  const [areaType, setAreaType] = useState('59');
+
+  // Load apartment list
   useEffect(() => {
     fetchApartments()
       .then((data) => {
@@ -18,6 +30,74 @@ function Dashboard() {
       .catch(() => setApartments([]))
       .finally(() => setLoading(false));
   }, []);
+
+  // Load transactions + listings when apartment changes
+  useEffect(() => {
+    if (!selectedApt) return;
+
+    setTxLoading(true);
+    setTxData(null);
+    fetchTransactions(selectedApt, 24)
+      .then(setTxData)
+      .catch(() => setTxData(null))
+      .finally(() => setTxLoading(false));
+
+    setListingsLoading(true);
+    setListingsError(false);
+    setListings([]);
+    fetchListings(selectedApt)
+      .then((d) => setListings(d.listings || []))
+      .catch(() => { setListings([]); setListingsError(true); })
+      .finally(() => setListingsLoading(false));
+  }, [selectedApt]);
+
+  // Extract available area types from both data sources
+  const availableTypes = useMemo(() => {
+    const txTypes = txData?.transactions ? extractAreaTypes(txData.transactions) : [];
+    const listingTypes = extractAreaTypes(listings);
+    const merged = new Set([...txTypes, ...listingTypes]);
+    return [...merged].sort((a, b) => Number(a) - Number(b));
+  }, [txData, listings]);
+
+  // Auto-select first available type when apartment changes
+  useEffect(() => {
+    if (availableTypes.length > 0 && !availableTypes.includes(areaType)) {
+      setAreaType(availableTypes[0]);
+    }
+  }, [availableTypes, selectedApt]);
+
+  // Filter transaction data by area type
+  const filteredTxData = useMemo(() => {
+    if (!txData) return null;
+    const filtered = txData.transactions.filter(
+      (t) => getAreaType(t.area) === areaType
+    );
+    // Recompute summary from filtered transactions
+    const monthly = {};
+    for (const t of filtered) {
+      const key = t.dealMonth;
+      if (!monthly[key]) monthly[key] = [];
+      monthly[key].push(t.price);
+    }
+    const summary = Object.entries(monthly)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, prices]) => ({
+        month,
+        avg: Math.round(prices.reduce((s, p) => s + p, 0) / prices.length),
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+        count: prices.length,
+      }));
+    return { transactions: filtered, summary };
+  }, [txData, areaType]);
+
+  // Filter listings: exclude 월세, filter by area type
+  const filteredListings = useMemo(() => {
+    return listings.filter((l) => {
+      if (l.tradeType === '월세') return false;
+      return getAreaType(l.area) === areaType;
+    });
+  }, [listings, areaType]);
 
   if (loading) {
     return (
@@ -54,8 +134,35 @@ function Dashboard() {
       {selected && (
         <div className="dashboard-content">
           <ApartmentCard apartment={selected} />
-          <TransactionChart aptId={selected.id} aptName={selected.name} />
-          <ListingTable aptId={selected.id} aptName={selected.name} />
+
+          {/* Area type filter */}
+          {availableTypes.length > 0 && (
+            <div className="area-filter">
+              <span className="area-filter-label">면적</span>
+              {availableTypes.map((t) => (
+                <button
+                  key={t}
+                  className={`area-tab ${t === areaType ? 'active' : ''}`}
+                  onClick={() => setAreaType(t)}
+                >
+                  {t}㎡
+                </button>
+              ))}
+            </div>
+          )}
+
+          <TransactionChart
+            aptName={selected.name}
+            data={filteredTxData}
+            loading={txLoading}
+            areaType={areaType}
+          />
+          <ListingTable
+            aptName={selected.name}
+            listings={filteredListings}
+            loading={listingsLoading}
+            error={listingsError}
+          />
         </div>
       )}
     </div>

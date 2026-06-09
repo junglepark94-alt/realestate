@@ -1,30 +1,24 @@
-import { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { fetchTransactions } from '../api';
 
 const formatPrice = (v) => `${(v / 10000).toFixed(1)}억`;
 
-function TransactionChart({ aptId, aptName }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchTransactions(aptId, 24)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, [aptId]);
-
+function TransactionChart({ aptName, data, loading, areaType }) {
   if (loading) return <div className="card loading">실거래가 로딩중...</div>;
-  if (!data || !data.summary?.length) return <div className="card empty">실거래가 데이터 없음</div>;
+  if (!data || !data.summary?.length) {
+    return (
+      <div className="card">
+        <h3>📊 {aptName} 실거래가 추이 — {areaType}㎡</h3>
+        <p className="empty-text">해당 면적의 실거래 데이터가 없습니다</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card">
-      <h3>📊 {aptName} 실거래가 추이 (최근 24개월)</h3>
+      <h3>📊 {aptName} 실거래가 추이 — {areaType}㎡ (최근 24개월)</h3>
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data.summary} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
