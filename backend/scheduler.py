@@ -62,7 +62,7 @@ def refresh_all():
                 # --- Transactions (24 months) ---
                 try:
                     logger.info(f"[scheduler] Refreshing transactions for {apt_id}")
-                    data = get_transactions(apt, months=24, force_refresh=True)
+                    data = get_transactions(apt, months=24, force_refresh=True, apt_id=apt_id)
                     logger.info(f"[scheduler] {apt_id} transactions: {len(data)}")
                 except Exception as e:
                     logger.error(f"[scheduler] {apt_id} transactions error: {e}")

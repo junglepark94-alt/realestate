@@ -38,8 +38,8 @@ def _fetch_month(lawd_cd: str, deal_ymd: str) -> list[dict]:
     return items
 
 
-def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = False) -> list[dict]:
-    apt_name_key = apt_config["search_names"][0].replace(" ", "")
+def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = False, apt_id: str = "") -> list[dict]:
+    apt_name_key = apt_id or apt_config["search_names"][0].replace(" ", "")
     cache_key = f"transactions_{apt_name_key}_{months}"
     cache_path = CACHE_DIR / f"{cache_key}.json"
 

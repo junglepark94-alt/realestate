@@ -47,7 +47,7 @@ def transactions(apt_id):
 
     months = request.args.get("months", 12, type=int)
     try:
-        data = get_transactions(apt, months)
+        data = get_transactions(apt, months, apt_id=apt_id)
         summary = get_monthly_summary(transactions=data)
     except Exception as e:
         return jsonify({"error": str(e), "transactions": [], "summary": []})
