@@ -56,12 +56,12 @@ APARTMENTS = {
         },
     },
     "gyeonghigung-xi": {
-        "name": "경희궁자이2단지",
+        "name": "경희궁자이",
         "dong": "홍파동",
         "gu": "종로구",
         "lawd_cd": "11110",
         "complex_no": "109379",
-        "search_names": ["경희궁자이2단지", "경희궁자이 2단지"],
+        "search_names": ["경희궁자이"],
         "info": {
             "address": "서울시 종로구 홍파동",
             "totalHouseholdCount": 1148,
