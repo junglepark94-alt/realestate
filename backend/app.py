@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
-from services.naver_land import get_complex_info, get_listings, get_price_trend, save_listings_cache
+from services.naver_land import get_complex_info, get_listings, get_price_trend, save_listings_cache, preload_all_listings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -110,6 +110,10 @@ def serve_frontend(path):
     if path and file.exists():
         return send_from_directory(STATIC_DIR, path)
     return send_from_directory(STATIC_DIR, "index.html")
+
+
+# Warm cache on startup (runs in background thread)
+preload_all_listings()
 
 
 if __name__ == "__main__":

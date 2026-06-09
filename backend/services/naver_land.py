@@ -12,12 +12,13 @@ logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).parent.parent / ".cache"
 CACHE_DIR.mkdir(exist_ok=True)
-CACHE_TTL_SHORT = timedelta(minutes=30)
+CACHE_TTL_LISTINGS = timedelta(hours=24)
 CACHE_TTL_LONG = timedelta(hours=24)
 
 _lock = threading.Lock()
 _pw_instance = None
 _browser_instance = None
+_refresh_in_progress = set()  # track which apt_ids are being refreshed
 
 LAND_OLD = "https://land.naver.com"
 
@@ -64,6 +65,20 @@ def _read_cache(key: str, ttl: timedelta | None = None) -> dict | None:
         return data
     except Exception:
         return None
+
+
+def _read_cache_any(key: str) -> tuple[dict | None, bool]:
+    """Read cache regardless of TTL. Returns (data, is_expired)."""
+    path = CACHE_DIR / f"{key}.json"
+    if not path.exists():
+        return None, True
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        cached_at = datetime.fromisoformat(data.get("_cached_at", "2000-01-01"))
+        expired = datetime.now() - cached_at > CACHE_TTL_LISTINGS
+        return data, expired
+    except Exception:
+        return None, True
 
 
 def _write_cache(key: str, data: dict):
@@ -276,27 +291,56 @@ def save_listings_cache(apt_id: str, listings: list[dict]):
     _write_cache(f"listings_{apt_id}", {"listings": listings})
 
 
-def get_listings(apt_id: str) -> list[dict]:
-    # Check cache first (30min TTL for scraped data)
-    cache = _read_cache(f"listings_{apt_id}", CACHE_TTL_SHORT)
-    if cache and "listings" in cache:
-        logger.info(f"[get_listings] Returning {len(cache['listings'])} cached listings for {apt_id}")
-        return cache["listings"]
+def _refresh_listings_bg(apt_id: str):
+    """Background refresh for a single apartment's listings."""
+    if apt_id in _refresh_in_progress:
+        return
+    _refresh_in_progress.add(apt_id)
+    try:
+        apt = APARTMENTS.get(apt_id)
+        if not apt or "complex_no" not in apt:
+            return
+        logger.info(f"[refresh_bg] Starting refresh for {apt_id}")
+        listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
+        if listings:
+            _write_cache(f"listings_{apt_id}", {"listings": listings})
+            logger.info(f"[refresh_bg] Refreshed {apt_id}: {len(listings)} listings")
+        else:
+            logger.warning(f"[refresh_bg] No listings fetched for {apt_id}")
+    except Exception as e:
+        logger.error(f"[refresh_bg] Error refreshing {apt_id}: {e}")
+    finally:
+        _refresh_in_progress.discard(apt_id)
 
+
+def get_listings(apt_id: str) -> list[dict]:
     apt = APARTMENTS.get(apt_id)
     if not apt or "complex_no" not in apt:
         return []
 
-    # Use old land.naver.com domain (not rate-limited)
-    listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
+    # Stale-while-revalidate: return cached data immediately, refresh in background
+    cache, expired = _read_cache_any(f"listings_{apt_id}")
 
+    if cache and "listings" in cache:
+        if expired and apt_id not in _refresh_in_progress:
+            # Return stale cache now, refresh in background
+            logger.info(f"[get_listings] Returning stale cache for {apt_id}, triggering bg refresh")
+            t = threading.Thread(target=_refresh_listings_bg, args=(apt_id,), daemon=True)
+            t.start()
+        else:
+            logger.info(f"[get_listings] Returning fresh cache for {apt_id}: {len(cache['listings'])} listings")
+        return cache["listings"]
+
+    # No cache at all — must fetch synchronously (first visit)
+    logger.info(f"[get_listings] No cache for {apt_id}, fetching synchronously")
+    listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
     if listings:
         _write_cache(f"listings_{apt_id}", {"listings": listings})
     return listings
 
 
 def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
-    cache = _read_cache(f"trend_{apt_id}", CACHE_TTL_SHORT)
+    cache = _read_cache(f"trend_{apt_id}", CACHE_TTL_LISTINGS)
     if cache:
         cache.pop("_cached_at", None)
         return cache
@@ -305,3 +349,21 @@ def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
     # Return None gracefully - the dashboard shows 실거래가 chart instead
     logger.info(f"[get_price_trend] No cached trend for {apt_id}, skipping (rate-limited)")
     return None
+
+
+def preload_all_listings():
+    """Background preload: refresh listings for all apartments.
+    Called once on server startup to warm the cache."""
+    def _worker():
+        time.sleep(5)  # let the server finish starting
+        for apt_id in APARTMENTS:
+            cache, expired = _read_cache_any(f"listings_{apt_id}")
+            if not cache or expired:
+                logger.info(f"[preload] Refreshing listings for {apt_id}")
+                _refresh_listings_bg(apt_id)
+            else:
+                logger.info(f"[preload] Cache fresh for {apt_id}, skipping")
+
+    t = threading.Thread(target=_worker, daemon=True)
+    t.start()
+    logger.info("[preload] Background listing preload started")

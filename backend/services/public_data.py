@@ -1,14 +1,21 @@
+import json
+import logging
 import requests
 import urllib3
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from config import PUBLIC_DATA_API_KEY
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+logger = logging.getLogger(__name__)
 
 BASE_URL = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade"
+CACHE_DIR = Path(__file__).parent.parent / ".cache"
+CACHE_DIR.mkdir(exist_ok=True)
+CACHE_TTL_TRANSACTIONS = timedelta(hours=12)
 
 
 def _fetch_month(lawd_cd: str, deal_ymd: str) -> list[dict]:
@@ -31,6 +38,20 @@ def _fetch_month(lawd_cd: str, deal_ymd: str) -> list[dict]:
 
 
 def get_transactions(apt_config: dict, months: int = 12) -> list[dict]:
+    # Check cache first
+    apt_name_key = apt_config["search_names"][0].replace(" ", "")
+    cache_key = f"transactions_{apt_name_key}_{months}"
+    cache_path = CACHE_DIR / f"{cache_key}.json"
+    if cache_path.exists():
+        try:
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+            cached_at = datetime.fromisoformat(cached.get("_cached_at", "2000-01-01"))
+            if datetime.now() - cached_at < CACHE_TTL_TRANSACTIONS:
+                logger.info(f"[transactions] Returning cached data for {apt_name_key} ({len(cached['data'])} items)")
+                return cached["data"]
+        except Exception:
+            pass
+
     lawd_cd = apt_config["lawd_cd"]
     search_names = apt_config["search_names"]
     now = datetime.now()
@@ -61,6 +82,13 @@ def get_transactions(apt_config: dict, months: int = 12) -> list[dict]:
                 })
 
     all_items.sort(key=lambda x: x["date"])
+
+    # Write cache
+    cache_path.write_text(
+        json.dumps({"_cached_at": datetime.now().isoformat(), "data": all_items}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    logger.info(f"[transactions] Cached {len(all_items)} items for {apt_name_key}")
     return all_items
 
 
