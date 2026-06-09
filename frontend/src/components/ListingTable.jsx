@@ -88,6 +88,15 @@ function ListingTable({ aptName, listings, loading, error }) {
                 <span className="dot" />
                 <span>{l.articleConfirmYmd}</span>
                 {l.articleFeatureDesc && <span className="listing-has-desc">i</span>}
+                <a
+                  href={`https://new.land.naver.com/article/${l.articleNo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="listing-link"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  네이버
+                </a>
               </div>
             </div>
           ))}
