@@ -188,6 +188,22 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 114㎡",
         },
     },
+    "bukhansan-hometown": {
+        "name": "북한산현대홈타운",
+        "dong": "불광동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "9239",
+        "search_names": ["북한산현대홈타운"],
+        "info": {
+            "address": "서울시 은평구 불광동",
+            "totalHouseholdCount": 662,
+            "highFloor": "",
+            "useApproveYmd": "2004.05",
+            "builder": "현대건설(주)",
+            "areas": "59㎡, 84㎡, 114㎡",
+        },
+    },
     "bukhansan-raemian": {
         "name": "북한산래미안",
         "dong": "불광동",
