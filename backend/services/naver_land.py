@@ -1,11 +1,14 @@
 import json
 import re
 import time
+import logging
 import threading
 from pathlib import Path
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 from config import APARTMENTS
+
+logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).parent.parent / ".cache"
 CACHE_DIR.mkdir(exist_ok=True)
@@ -27,7 +30,7 @@ def _ensure_browser():
     _pw_instance = sync_playwright().start()
     _browser_instance = _pw_instance.chromium.launch(
         headless=True,
-        args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+        args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"],
     )
     return _browser_instance
 
@@ -71,22 +74,24 @@ def _write_cache(key: str, data: dict):
 
 
 def _scrape_complex_info_old(apt_name: str) -> dict | None:
-    """Scrape complex info from old land.naver.com HTML (reliable, no rate limit)."""
     with _lock:
         page = _make_page()
         try:
             url = f"{LAND_OLD}/search/complex.naver?tab=complex&query={apt_name}"
+            logger.info(f"[complex_info] Navigating to {url}")
             page.goto(url, wait_until="networkidle", timeout=20000)
             time.sleep(2)
 
             table = page.locator("table").first
             if table.count() == 0:
+                logger.warning(f"[complex_info] No table found for {apt_name}")
+                logger.info(f"[complex_info] Page title: {page.title()}")
+                logger.info(f"[complex_info] URL after nav: {page.url}")
                 return None
 
             text = (table.text_content() or "").replace("\xa0", " ")
             text = re.sub(r"\s+", " ", text).strip()
 
-            # Format 1: Single result with labeled fields (단지명, 소재지, 규모...)
             if "규모" in text and "건설사" in text:
                 households = ""
                 floors = ""
@@ -118,9 +123,6 @@ def _scrape_complex_info_old(apt_name: str) -> dict | None:
                     "pyeongList": [],
                 }
 
-            # Format 2: Multiple results table
-            # Each row has cells: [매물종류, 소재지, 단지명, 면적, 입주, 세대수, 동수, 매매/전세/월세]
-            # First row may combine header + first data row
             rows = page.locator("table tr")
             for i in range(rows.count()):
                 all_cells = page.locator(f"table tr:nth-child({i+1}) td, table tr:nth-child({i+1}) th")
@@ -130,10 +132,8 @@ def _scrape_complex_info_old(apt_name: str) -> dict | None:
                     ct = re.sub(r"\s+", " ", ct).strip()
                     cell_texts.append(ct)
 
-                # Find the cell that exactly matches our apartment name
                 for idx, ct in enumerate(cell_texts):
                     if ct == apt_name:
-                        # Data cells follow the pattern: ...종류, 소재지, 단지명, 면적, 입주, 세대수, 동수, 매물현황
                         address = cell_texts[idx - 1] if idx >= 1 else ""
                         areas = cell_texts[idx + 1] if idx + 1 < len(cell_texts) else ""
                         입주일 = cell_texts[idx + 2] if idx + 2 < len(cell_texts) else ""
@@ -155,27 +155,28 @@ def _scrape_complex_info_old(apt_name: str) -> dict | None:
                             "pyeongList": [],
                         }
 
+            logger.warning(f"[complex_info] No matching row for {apt_name}")
             return None
-        except Exception:
+        except Exception as e:
+            logger.error(f"[complex_info] Error scraping {apt_name}: {e}")
             return None
         finally:
             page.context.close()
 
 
 def _fetch_api_via_page(complex_no: str, api_url: str) -> dict | list | None:
-    """Navigate to fin.land.naver.com and fetch API from within page context."""
     with _lock:
         page = _make_page()
         try:
-            page.goto(
-                f"{LAND_NEW}/complexes/{complex_no}",
-                wait_until="load",
-                timeout=20000,
-            )
+            target = f"{LAND_NEW}/complexes/{complex_no}"
+            logger.info(f"[api_via_page] Navigating to {target}")
+            page.goto(target, wait_until="load", timeout=20000)
             page.wait_for_load_state("networkidle")
+            logger.info(f"[api_via_page] Page loaded, URL: {page.url}")
             time.sleep(2)
 
             for attempt in range(3):
+                logger.info(f"[api_via_page] Fetching {api_url} (attempt {attempt+1})")
                 result = page.evaluate("""async (url) => {
                     try {
                         const r = await fetch(url);
@@ -188,13 +189,17 @@ def _fetch_api_via_page(complex_no: str, api_url: str) -> dict | list | None:
                 }""", api_url)
 
                 if result and result.get("_retry"):
+                    logger.warning(f"[api_via_page] Rate limited (429), waiting...")
                     time.sleep(3 * (attempt + 1))
                     continue
                 if result and "_error" not in result:
+                    logger.info(f"[api_via_page] Success")
                     return result
+                logger.warning(f"[api_via_page] Failed: {result}")
                 break
             return None
-        except Exception:
+        except Exception as e:
+            logger.error(f"[api_via_page] Error: {e}")
             return None
         finally:
             page.context.close()
@@ -203,14 +208,32 @@ def _fetch_api_via_page(complex_no: str, api_url: str) -> dict | list | None:
 # --- Public API ---
 
 def get_complex_info(apt_id: str) -> dict | None:
+    apt = APARTMENTS.get(apt_id)
+    if not apt:
+        return None
+
+    # Use static info from config if available
+    static = apt.get("info")
+    if static:
+        return {
+            "name": apt["name"],
+            "address": static.get("address", ""),
+            "totalHouseholdCount": static.get("totalHouseholdCount", 0),
+            "highFloor": static.get("highFloor", ""),
+            "lowFloor": static.get("lowFloor", ""),
+            "useApproveYmd": static.get("useApproveYmd", ""),
+            "builder": static.get("builder", ""),
+            "areas": static.get("areas", ""),
+            "complexNo": apt.get("complex_no", ""),
+            "dealCount": 0,
+            "leaseCount": 0,
+        }
+
+    # Fallback: scrape from Naver
     cache = _read_cache(f"info_{apt_id}", CACHE_TTL_LONG)
     if cache:
         cache.pop("_cached_at", None)
         return cache
-
-    apt = APARTMENTS.get(apt_id)
-    if not apt:
-        return None
 
     complex_no = apt.get("complex_no", "")
     info = _scrape_complex_info_old(apt["name"])
@@ -233,20 +256,18 @@ def get_listings(apt_id: str) -> list[dict]:
 
     complex_no = apt["complex_no"]
 
-    # Try new.land.naver.com API via page context
-    api_url = (
+    url = (
         f"https://new.land.naver.com/api/articles/complex/{complex_no}"
-        f"?realEstateType=APT&tradeType=A1&page=1"
+        f"?realEstateType=APT&tradeType=&page=1&sizePerPage=50"
     )
-    data = _fetch_api_via_page(complex_no, api_url)
+    data = _fetch_api_via_page(complex_no, url)
 
     if not data:
-        # Try fin.land.naver.com API
-        api_url2 = (
+        url2 = (
             f"{LAND_NEW}/front-api/v1/article/list"
-            f"?complexNumber={complex_no}&tradeType=DEAL&page=0&size=20"
+            f"?complexNumber={complex_no}&tradeType=&page=0&size=50"
         )
-        data = _fetch_api_via_page(complex_no, api_url2)
+        data = _fetch_api_via_page(complex_no, url2)
 
     if not data:
         return []
@@ -271,7 +292,8 @@ def get_listings(apt_id: str) -> list[dict]:
             "realtorName": a.get("realtorName", ""),
         })
 
-    _write_cache(f"listings_{apt_id}", {"listings": listings})
+    if listings:
+        _write_cache(f"listings_{apt_id}", {"listings": listings})
     return listings
 
 
@@ -286,12 +308,12 @@ def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
         return None
 
     complex_no = apt["complex_no"]
-    api_url = (
+    url = (
         f"https://new.land.naver.com/api/complexes/{complex_no}/prices"
         f"?complexNo={complex_no}&tradeType=A1&year={years}"
         f"&priceChartChange=true&areaNo=&type=chart"
     )
-    data = _fetch_api_via_page(complex_no, api_url)
+    data = _fetch_api_via_page(complex_no, url)
 
     if data:
         _write_cache(f"trend_{apt_id}", data)

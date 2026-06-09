@@ -1,10 +1,16 @@
 import os
+import logging
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
 from services.naver_land import get_complex_info, get_listings, get_price_trend
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -18,7 +24,8 @@ def apartments():
     for apt_id, apt in APARTMENTS.items():
         try:
             info = get_complex_info(apt_id)
-        except Exception:
+        except Exception as e:
+            logging.error(f"get_complex_info({apt_id}) failed: {e}")
             info = None
         result.append({
             "id": apt_id,
@@ -53,7 +60,8 @@ def listings(apt_id):
 
     try:
         data = get_listings(apt_id)
-    except Exception:
+    except Exception as e:
+        logging.error(f"get_listings({apt_id}) failed: {e}")
         data = []
     return jsonify({"listings": data})
 
@@ -66,7 +74,8 @@ def price_trend(apt_id):
     years = request.args.get("years", 5, type=int)
     try:
         data = get_price_trend(apt_id, years)
-    except Exception:
+    except Exception as e:
+        logging.error(f"get_price_trend({apt_id}) failed: {e}")
         data = None
     return jsonify({"priceTrend": data})
 
