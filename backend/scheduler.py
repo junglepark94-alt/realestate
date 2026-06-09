@@ -47,7 +47,23 @@ def refresh_all():
             start = time.time()
 
             for apt_id, apt in APARTMENTS.items():
-                # --- Listings ---
+                # Fetch listings and transactions in parallel (independent data sources)
+                tx_result = [None, None]  # [data, error]
+
+                def _fetch_tx(aid=apt_id, acfg=apt):
+                    try:
+                        logger.info(f"[scheduler] Refreshing transactions for {aid}")
+                        data = get_transactions(acfg, months=24, force_refresh=True, apt_id=aid)
+                        tx_result[0] = len(data)
+                        logger.info(f"[scheduler] {aid} transactions: {len(data)}")
+                    except Exception as e:
+                        tx_result[1] = e
+                        logger.error(f"[scheduler] {aid} transactions error: {e}")
+
+                tx_thread = threading.Thread(target=_fetch_tx)
+                tx_thread.start()
+
+                # Listings run on main refresh thread (Playwright has its own lock)
                 try:
                     logger.info(f"[scheduler] Refreshing listings for {apt_id}")
                     listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
@@ -59,13 +75,8 @@ def refresh_all():
                 except Exception as e:
                     logger.error(f"[scheduler] {apt_id} listings error: {e}")
 
-                # --- Transactions (24 months) ---
-                try:
-                    logger.info(f"[scheduler] Refreshing transactions for {apt_id}")
-                    data = get_transactions(apt, months=24, force_refresh=True, apt_id=apt_id)
-                    logger.info(f"[scheduler] {apt_id} transactions: {len(data)}")
-                except Exception as e:
-                    logger.error(f"[scheduler] {apt_id} transactions error: {e}")
+                # Wait for transactions to finish before moving to next apartment
+                tx_thread.join()
 
             elapsed = time.time() - start
             logger.info(f"[scheduler] === Refresh complete in {elapsed:.1f}s ===")
