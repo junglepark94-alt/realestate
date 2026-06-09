@@ -243,11 +243,18 @@ def get_complex_info(apt_id: str) -> dict | None:
     return info
 
 
+def save_listings_cache(apt_id: str, listings: list[dict]):
+    """Save listings data pushed from a local scraper."""
+    _write_cache(f"listings_{apt_id}", {"listings": listings})
+
+
 def get_listings(apt_id: str) -> list[dict]:
-    cache = _read_cache(f"listings_{apt_id}", CACHE_TTL_SHORT)
+    # Check cache first (synced data has no TTL limit, self-scraped has 30min)
+    cache = _read_cache(f"listings_{apt_id}")
     if cache and "listings" in cache:
         return cache["listings"]
 
+    # Try scraping from server (works on Korean IP, fails on overseas)
     apt = APARTMENTS.get(apt_id)
     if not apt or "complex_no" not in apt:
         return []

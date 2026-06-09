@@ -17,9 +17,9 @@ function ListingTable({ aptId, aptName }) {
 
   if (loading) return <div className="card loading">매물 로딩중...</div>;
   if (error) return (
-    <div className="card empty">
+    <div className="card">
       <h3>🏠 {aptName} 현재 매물</h3>
-      <p className="empty-text">매물 정보를 불러올 수 없습니다 (네이버 부동산 접속 제한)</p>
+      <p className="empty-text">네이버 부동산 접속 제한으로 매물 정보를 불러올 수 없습니다</p>
     </div>
   );
 

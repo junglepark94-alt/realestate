@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
-from services.naver_land import get_complex_info, get_listings, get_price_trend
+from services.naver_land import get_complex_info, get_listings, get_price_trend, save_listings_cache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,6 +78,29 @@ def price_trend(apt_id):
         logging.error(f"get_price_trend({apt_id}) failed: {e}")
         data = None
     return jsonify({"priceTrend": data})
+
+
+SYNC_KEY = os.environ.get("SYNC_KEY", "")
+
+
+@app.route("/api/sync-listings", methods=["POST"])
+def sync_listings():
+    """Receive listing data pushed from a local scraper (Korean IP)."""
+    key = request.headers.get("X-Sync-Key", "")
+    if not SYNC_KEY or key != SYNC_KEY:
+        return jsonify({"error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True)
+    if not data or "apt_id" not in data or "listings" not in data:
+        return jsonify({"error": "invalid payload"}), 400
+
+    apt_id = data["apt_id"]
+    if apt_id not in APARTMENTS:
+        return jsonify({"error": "unknown apartment"}), 404
+
+    save_listings_cache(apt_id, data["listings"])
+    logging.info(f"[sync] Received {len(data['listings'])} listings for {apt_id}")
+    return jsonify({"ok": True, "count": len(data["listings"])})
 
 
 @app.route("/", defaults={"path": ""})

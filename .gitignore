@@ -34,5 +34,8 @@ frontend/src/assets/vite.svg
 frontend/public/icons.svg
 frontend/README.md
 
+# Test scripts
+test_scrape*.py
+
 # Build output (served by Flask in production)
 backend/static/
