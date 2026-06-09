@@ -55,4 +55,20 @@ APARTMENTS = {
             "areas": "82㎡, 107㎡, 140㎡",
         },
     },
+    "gyeonghigung-xi": {
+        "name": "경희궁자이2단지",
+        "dong": "홍파동",
+        "gu": "종로구",
+        "lawd_cd": "11110",
+        "complex_no": "109379",
+        "search_names": ["경희궁자이2단지", "경희궁자이 2단지"],
+        "info": {
+            "address": "서울시 종로구 홍파동",
+            "totalHouseholdCount": 1148,
+            "highFloor": "21",
+            "useApproveYmd": "2017.02",
+            "builder": "GS건설(주)",
+            "areas": "82㎡, 113㎡, 130㎡",
+        },
+    },
 }
