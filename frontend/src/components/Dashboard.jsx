@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { fetchApartments, fetchTransactions, fetchListings } from '../api';
-import { getAreaType, extractAreaTypes } from '../utils/areaType';
+import { getAreaType, extractAreaTypes, areaLabel } from '../utils/areaType';
 import ApartmentCard from './ApartmentCard';
 import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
@@ -167,7 +167,7 @@ function Dashboard() {
                   className={`area-tab ${t === areaType ? 'active' : ''}`}
                   onClick={() => setAreaType(t)}
                 >
-                  {t}㎡
+                  {areaLabel(t)}
                 </button>
               ))}
             </div>

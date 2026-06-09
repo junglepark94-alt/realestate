@@ -1,3 +1,5 @@
+import { areasWithPyeong } from '../utils/areaType';
+
 function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
   const info = apartment.naverInfo;
 
@@ -35,8 +37,8 @@ function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
           )}
           {info.areas && (
             <div className="apt-stat">
-              <span className="label">면적(㎡)</span>
-              <span className="value">{info.areas}</span>
+              <span className="label">면적</span>
+              <span className="value">{areasWithPyeong(info.areas)}</span>
             </div>
           )}
           <div className="apt-stat">

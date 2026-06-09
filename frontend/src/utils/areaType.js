@@ -14,6 +14,19 @@ export function getAreaType(exclusiveArea) {
   return '156';
 }
 
+export function toPyeong(sqm) {
+  return Math.round(Number(sqm) / 3.3058);
+}
+
+export function areaLabel(sqm) {
+  return `${Math.round(Number(sqm))}㎡(${toPyeong(sqm)}평)`;
+}
+
+export function areasWithPyeong(areasStr) {
+  if (!areasStr) return '';
+  return areasStr.replace(/(\d+(?:\.\d+)?)\s*㎡/g, (_, n) => `${Math.round(Number(n))}㎡(${toPyeong(n)}평)`);
+}
+
 /**
  * Extract sorted unique area types from a list of items with an area field.
  */

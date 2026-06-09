@@ -2,6 +2,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { areaLabel } from '../utils/areaType';
 
 const formatPrice = (v) => `${(v / 10000).toFixed(1)}억`;
 const formatAxisPrice = (v) => `${(v / 10000).toFixed(0)}`;
@@ -11,7 +12,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
   if (!data || !data.summary?.length) {
     return (
       <div className="card">
-        <h3>실거래가 추이 &middot; {areaType}㎡</h3>
+        <h3>실거래가 추이 &middot; {areaLabel(areaType)}</h3>
         <p className="empty-text">해당 면적의 실거래 데이터가 없습니다</p>
       </div>
     );
@@ -26,7 +27,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
   return (
     <div className="card">
       <h3>
-        실거래가 추이 &middot; {areaType}㎡
+        실거래가 추이 &middot; {areaLabel(areaType)}
         <span className="h3-sub">24개월</span>
       </h3>
       <div className="chart-wrap">
@@ -80,7 +81,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
               <div className="tx-row" key={i}>
                 <span className="tx-date">{t.date}</span>
                 <span className="tx-price price">{formatPrice(t.price)}</span>
-                <span className="tx-info">{t.area}㎡ &middot; {t.floor}층</span>
+                <span className="tx-info">{areaLabel(t.area)} &middot; {t.floor}층</span>
               </div>
             ))}
           </div>
