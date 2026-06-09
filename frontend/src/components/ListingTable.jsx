@@ -1,15 +1,9 @@
-/**
- * Convert 만원 price string to 억 format.
- * "132,000" → "13.2억"
- * "50,000" → "5.0억"
- * "8,000/190" (전세 보증금/월세) → "0.8억/190"
- */
+import { useState, useMemo } from 'react';
+
 function formatPriceToEok(priceStr) {
   if (!priceStr) return '';
-  // Handle slash-separated prices (보증금/월세)
   if (priceStr.includes('/')) {
-    const parts = priceStr.split('/');
-    return parts.map(formatSinglePrice).join(' / ');
+    return priceStr.split('/').map(formatSinglePrice).join(' / ');
   }
   return formatSinglePrice(priceStr);
 }
@@ -20,7 +14,30 @@ function formatSinglePrice(s) {
   return `${(num / 10000).toFixed(1)}억`;
 }
 
+const TRADE_TABS = [
+  { key: 'all', label: '전체' },
+  { key: '매매', label: '매매' },
+  { key: '전세', label: '전세' },
+];
+
 function ListingTable({ aptName, listings, loading, error }) {
+  const [tradeFilter, setTradeFilter] = useState('all');
+
+  const filtered = useMemo(() => {
+    if (tradeFilter === 'all') return listings;
+    return listings.filter((l) => l.tradeType === tradeFilter);
+  }, [listings, tradeFilter]);
+
+  // Count per trade type for badge numbers
+  const counts = useMemo(() => {
+    const m = { all: listings.length, '매매': 0, '전세': 0 };
+    for (const l of listings) {
+      if (l.tradeType === '매매') m['매매']++;
+      else if (l.tradeType === '전세') m['전세']++;
+    }
+    return m;
+  }, [listings]);
+
   if (loading) return <div className="card loading">매물 로딩중...</div>;
   if (error) return (
     <div className="card">
@@ -31,9 +48,23 @@ function ListingTable({ aptName, listings, loading, error }) {
 
   return (
     <div className="card">
-      <h3>🏠 {aptName} 매매/전세 매물 ({listings.length}건)</h3>
-      {listings.length === 0 ? (
-        <p className="empty-text">해당 면적의 매매/전세 매물이 없습니다</p>
+      <div className="listing-header">
+        <h3>🏠 {aptName} 매매/전세 매물</h3>
+        <div className="trade-filter">
+          {TRADE_TABS.map((t) => (
+            <button
+              key={t.key}
+              className={`trade-tab ${tradeFilter === t.key ? 'active' : ''}`}
+              onClick={() => setTradeFilter(t.key)}
+            >
+              {t.label}
+              <span className="trade-count">{counts[t.key]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {filtered.length === 0 ? (
+        <p className="empty-text">해당 조건의 매물이 없습니다</p>
       ) : (
         <table>
           <thead>
@@ -47,7 +78,7 @@ function ListingTable({ aptName, listings, loading, error }) {
             </tr>
           </thead>
           <tbody>
-            {listings.map((l) => (
+            {filtered.map((l) => (
               <tr key={l.articleNo}>
                 <td>
                   <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : 'lease'}`}>
