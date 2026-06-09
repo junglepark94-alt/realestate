@@ -89,7 +89,9 @@ function ListingTable({ aptName, listings, loading, error }) {
                 <span>{l.articleConfirmYmd}</span>
                 {l.articleFeatureDesc && <span className="listing-has-desc">i</span>}
                 <a
-                  href={`https://new.land.naver.com/article/${l.articleNo}`}
+                  href={/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                    ? `https://m.land.naver.com/article/info/${l.articleNo}`
+                    : `https://new.land.naver.com/article/${l.articleNo}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="listing-link"
