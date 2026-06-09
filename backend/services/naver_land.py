@@ -12,13 +12,12 @@ logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).parent.parent / ".cache"
 CACHE_DIR.mkdir(exist_ok=True)
-CACHE_TTL_LISTINGS = timedelta(hours=24)
-CACHE_TTL_LONG = timedelta(hours=24)
+# Long TTL — scheduler refreshes daily, this is just a safety net
+CACHE_TTL = timedelta(days=7)
 
 _lock = threading.Lock()
 _pw_instance = None
 _browser_instance = None
-_refresh_in_progress = set()  # track which apt_ids are being refreshed
 
 LAND_OLD = "https://land.naver.com"
 
@@ -53,29 +52,26 @@ def _make_page():
     return page
 
 
-def _read_cache(key: str, ttl: timedelta | None = None) -> dict | None:
+def _read_cache(key: str) -> dict | None:
     path = CACHE_DIR / f"{key}.json"
     if not path.exists():
         return None
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        cached_at = datetime.fromisoformat(data.get("_cached_at", "2000-01-01"))
-        if ttl and datetime.now() - cached_at > ttl:
-            return None
         return data
     except Exception:
         return None
 
 
 def _read_cache_any(key: str) -> tuple[dict | None, bool]:
-    """Read cache regardless of TTL. Returns (data, is_expired)."""
+    """Read cache. Returns (data, is_expired)."""
     path = CACHE_DIR / f"{key}.json"
     if not path.exists():
         return None, True
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         cached_at = datetime.fromisoformat(data.get("_cached_at", "2000-01-01"))
-        expired = datetime.now() - cached_at > CACHE_TTL_LISTINGS
+        expired = datetime.now() - cached_at > CACHE_TTL
         return data, expired
     except Exception:
         return None, True
@@ -85,97 +81,6 @@ def _write_cache(key: str, data: dict):
     data["_cached_at"] = datetime.now().isoformat()
     path = CACHE_DIR / f"{key}.json"
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _scrape_complex_info_old(apt_name: str) -> dict | None:
-    with _lock:
-        page = _make_page()
-        try:
-            url = f"{LAND_OLD}/search/complex.naver?tab=complex&query={apt_name}"
-            logger.info(f"[complex_info] Navigating to {url}")
-            page.goto(url, wait_until="networkidle", timeout=20000)
-            time.sleep(2)
-
-            table = page.locator("table").first
-            if table.count() == 0:
-                logger.warning(f"[complex_info] No table found for {apt_name}")
-                logger.info(f"[complex_info] Page title: {page.title()}")
-                logger.info(f"[complex_info] URL after nav: {page.url}")
-                return None
-
-            text = (table.text_content() or "").replace("\xa0", " ")
-            text = re.sub(r"\s+", " ", text).strip()
-
-            if "규모" in text and "건설사" in text:
-                households = ""
-                floors = ""
-                규모 = re.search(r"규모\s+(.+?)(?:\s+건설사|$)", text)
-                if 규모:
-                    h_match = re.search(r"총\s*(\d+)세대", 규모.group(1))
-                    f_match = re.search(r"총\s*(\d+)층", 규모.group(1))
-                    if h_match:
-                        households = h_match.group(1)
-                    if f_match:
-                        floors = f_match.group(1)
-
-                입주 = re.search(r"입주일자\s+(\S+)", text)
-                건설사 = re.search(r"건설사\s+(.+?)(?:\s+교통|$)", text)
-                면적 = re.search(r"면적\s+(.+?)(?:\s+단지사진|$)", text)
-                소재지 = re.search(r"소재지\s+(.+?)(?:\s+입주일자|$)", text)
-
-                return {
-                    "name": apt_name,
-                    "address": 소재지.group(1).strip() if 소재지 else "",
-                    "totalHouseholdCount": int(households) if households else 0,
-                    "highFloor": floors,
-                    "lowFloor": "",
-                    "useApproveYmd": 입주.group(1).strip() if 입주 else "",
-                    "builder": 건설사.group(1).strip() if 건설사 else "",
-                    "areas": 면적.group(1).strip() if 면적 else "",
-                    "dealCount": 0,
-                    "leaseCount": 0,
-                    "pyeongList": [],
-                }
-
-            rows = page.locator("table tr")
-            for i in range(rows.count()):
-                all_cells = page.locator(f"table tr:nth-child({i+1}) td, table tr:nth-child({i+1}) th")
-                cell_texts = []
-                for j in range(all_cells.count()):
-                    ct = (all_cells.nth(j).text_content() or "").replace("\xa0", " ")
-                    ct = re.sub(r"\s+", " ", ct).strip()
-                    cell_texts.append(ct)
-
-                for idx, ct in enumerate(cell_texts):
-                    if ct == apt_name:
-                        address = cell_texts[idx - 1] if idx >= 1 else ""
-                        areas = cell_texts[idx + 1] if idx + 1 < len(cell_texts) else ""
-                        입주일 = cell_texts[idx + 2] if idx + 2 < len(cell_texts) else ""
-                        세대수 = cell_texts[idx + 3] if idx + 3 < len(cell_texts) else "0"
-                        매물 = cell_texts[idx + 5] if idx + 5 < len(cell_texts) else "0/0/0"
-
-                        deals = re.findall(r"\d+", 매물)
-                        return {
-                            "name": apt_name,
-                            "address": address,
-                            "totalHouseholdCount": int(세대수) if 세대수.isdigit() else 0,
-                            "highFloor": "",
-                            "lowFloor": "",
-                            "useApproveYmd": 입주일,
-                            "builder": "",
-                            "areas": areas,
-                            "dealCount": int(deals[0]) if deals else 0,
-                            "leaseCount": int(deals[1]) if len(deals) > 1 else 0,
-                            "pyeongList": [],
-                        }
-
-            logger.warning(f"[complex_info] No matching row for {apt_name}")
-            return None
-        except Exception as e:
-            logger.error(f"[complex_info] Error scraping {apt_name}: {e}")
-            return None
-        finally:
-            page.context.close()
 
 
 def _fetch_listings_old_domain(apt_name: str, complex_no: str) -> list[dict]:
@@ -246,14 +151,14 @@ def _fetch_listings_old_domain(apt_name: str, complex_no: str) -> list[dict]:
             page.context.close()
 
 
-# --- Public API ---
+# --- Public API (always return from cache) ---
 
 def get_complex_info(apt_id: str) -> dict | None:
     apt = APARTMENTS.get(apt_id)
     if not apt:
         return None
 
-    # Use static info from config if available
+    # Use static info from config
     static = apt.get("info")
     if static:
         return {
@@ -269,21 +174,7 @@ def get_complex_info(apt_id: str) -> dict | None:
             "dealCount": 0,
             "leaseCount": 0,
         }
-
-    # Fallback: scrape from Naver
-    cache = _read_cache(f"info_{apt_id}", CACHE_TTL_LONG)
-    if cache:
-        cache.pop("_cached_at", None)
-        return cache
-
-    complex_no = apt.get("complex_no", "")
-    info = _scrape_complex_info_old(apt["name"])
-
-    if info:
-        info["complexNo"] = complex_no
-        _write_cache(f"info_{apt_id}", info)
-
-    return info
+    return None
 
 
 def save_listings_cache(apt_id: str, listings: list[dict]):
@@ -291,79 +182,18 @@ def save_listings_cache(apt_id: str, listings: list[dict]):
     _write_cache(f"listings_{apt_id}", {"listings": listings})
 
 
-def _refresh_listings_bg(apt_id: str):
-    """Background refresh for a single apartment's listings."""
-    if apt_id in _refresh_in_progress:
-        return
-    _refresh_in_progress.add(apt_id)
-    try:
-        apt = APARTMENTS.get(apt_id)
-        if not apt or "complex_no" not in apt:
-            return
-        logger.info(f"[refresh_bg] Starting refresh for {apt_id}")
-        listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
-        if listings:
-            _write_cache(f"listings_{apt_id}", {"listings": listings})
-            logger.info(f"[refresh_bg] Refreshed {apt_id}: {len(listings)} listings")
-        else:
-            logger.warning(f"[refresh_bg] No listings fetched for {apt_id}")
-    except Exception as e:
-        logger.error(f"[refresh_bg] Error refreshing {apt_id}: {e}")
-    finally:
-        _refresh_in_progress.discard(apt_id)
-
-
 def get_listings(apt_id: str) -> list[dict]:
-    apt = APARTMENTS.get(apt_id)
-    if not apt or "complex_no" not in apt:
-        return []
-
-    # Stale-while-revalidate: return cached data immediately, refresh in background
-    cache, expired = _read_cache_any(f"listings_{apt_id}")
-
+    """Always return from cache. Scheduler handles refreshes."""
+    cache = _read_cache(f"listings_{apt_id}")
     if cache and "listings" in cache:
-        if expired and apt_id not in _refresh_in_progress:
-            # Return stale cache now, refresh in background
-            logger.info(f"[get_listings] Returning stale cache for {apt_id}, triggering bg refresh")
-            t = threading.Thread(target=_refresh_listings_bg, args=(apt_id,), daemon=True)
-            t.start()
-        else:
-            logger.info(f"[get_listings] Returning fresh cache for {apt_id}: {len(cache['listings'])} listings")
         return cache["listings"]
-
-    # No cache at all — must fetch synchronously (first visit)
-    logger.info(f"[get_listings] No cache for {apt_id}, fetching synchronously")
-    listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
-    if listings:
-        _write_cache(f"listings_{apt_id}", {"listings": listings})
-    return listings
+    # No cache yet (server just deployed) — return empty, scheduler will fill it
+    return []
 
 
 def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
-    cache = _read_cache(f"trend_{apt_id}", CACHE_TTL_LISTINGS)
+    cache = _read_cache(f"trend_{apt_id}")
     if cache:
         cache.pop("_cached_at", None)
         return cache
-
-    # Price trend from new.land.naver.com is likely rate-limited
-    # Return None gracefully - the dashboard shows 실거래가 chart instead
-    logger.info(f"[get_price_trend] No cached trend for {apt_id}, skipping (rate-limited)")
     return None
-
-
-def preload_all_listings():
-    """Background preload: refresh listings for all apartments.
-    Called once on server startup to warm the cache."""
-    def _worker():
-        time.sleep(5)  # let the server finish starting
-        for apt_id in APARTMENTS:
-            cache, expired = _read_cache_any(f"listings_{apt_id}")
-            if not cache or expired:
-                logger.info(f"[preload] Refreshing listings for {apt_id}")
-                _refresh_listings_bg(apt_id)
-            else:
-                logger.info(f"[preload] Cache fresh for {apt_id}, skipping")
-
-    t = threading.Thread(target=_worker, daemon=True)
-    t.start()
-    logger.info("[preload] Background listing preload started")
