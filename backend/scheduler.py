@@ -81,21 +81,8 @@ def start_scheduler():
     """
     def _startup_refresh():
         time.sleep(3)  # let gunicorn finish booting
-        from services.naver_land import _read_cache_any
-
-        # Check if any cache is missing
-        needs_refresh = False
-        for apt_id in APARTMENTS:
-            cache, _ = _read_cache_any(f"listings_{apt_id}")
-            if not cache:
-                needs_refresh = True
-                break
-
-        if needs_refresh:
-            logger.info("[scheduler] Cold cache detected, running startup refresh")
-            refresh_all()
-        else:
-            logger.info("[scheduler] All caches warm, skipping startup refresh")
+        logger.info("[scheduler] Running startup refresh")
+        refresh_all()
 
     def _daily_loop():
         while True:
