@@ -17,10 +17,10 @@ function TransactionChart({ aptName, data, loading, areaType }) {
     );
   }
 
-  // Shorten month labels: "2025-06" → "06"
+  // Shorten month labels: "2025-06" → "25.06"
   const chartData = data.summary.map((d) => ({
     ...d,
-    label: d.month.slice(5),
+    label: d.month.slice(2).replace('-', '.'),
   }));
 
   return (
@@ -50,7 +50,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
             />
             <Tooltip
               formatter={(v, name) => [formatPrice(v), name]}
-              labelFormatter={(l) => `${l}월`}
+              labelFormatter={(l) => `20${l.replace('.', '년 ')}월`}
               contentStyle={{
                 fontSize: '13px',
                 borderRadius: '8px',
