@@ -57,6 +57,7 @@ def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = F
     lawd_cd = apt_config["lawd_cd"]
     search_names = apt_config["search_names"]
     search_dong = apt_config.get("search_dong")
+    search_build_year = apt_config.get("search_build_year")
     now = datetime.now()
 
     ymds = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
@@ -69,6 +70,8 @@ def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = F
         for item in items:
             apt_name = item.get("aptNm", "")
             if search_dong and item.get("umdNm", "").strip() != search_dong:
+                continue
+            if search_build_year and item.get("buildYear", "").strip() != search_build_year:
                 continue
             if any(name in apt_name for name in search_names):
                 deal_amount = item.get("dealAmount", "0").replace(",", "").strip()

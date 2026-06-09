@@ -145,6 +145,7 @@ APARTMENTS = {
         "complex_no": "332",
         "search_names": ["신동아"],
         "search_dong": "행당동",
+        "search_build_year": "1995",
         "info": {
             "address": "서울시 성동구 행당동",
             "totalHouseholdCount": 636,
