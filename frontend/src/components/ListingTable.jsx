@@ -4,16 +4,24 @@ import { fetchListings } from '../api';
 function ListingTable({ aptId, aptName }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
+    setError(false);
     fetchListings(aptId)
       .then((d) => setListings(d.listings || []))
-      .catch(() => setListings([]))
+      .catch(() => { setListings([]); setError(true); })
       .finally(() => setLoading(false));
   }, [aptId]);
 
   if (loading) return <div className="card loading">매물 로딩중...</div>;
+  if (error) return (
+    <div className="card empty">
+      <h3>🏠 {aptName} 현재 매물</h3>
+      <p className="empty-text">매물 정보를 불러올 수 없습니다 (네이버 부동산 접속 제한)</p>
+    </div>
+  );
 
   return (
     <div className="card">

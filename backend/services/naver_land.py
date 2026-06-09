@@ -170,33 +170,31 @@ def _fetch_api_via_page(complex_no: str, api_url: str) -> dict | list | None:
         try:
             target = f"{LAND_NEW}/complexes/{complex_no}"
             logger.info(f"[api_via_page] Navigating to {target}")
-            page.goto(target, wait_until="load", timeout=20000)
-            page.wait_for_load_state("networkidle")
-            logger.info(f"[api_via_page] Page loaded, URL: {page.url}")
-            time.sleep(2)
+            page.goto(target, wait_until="load", timeout=10000)
+            try:
+                page.wait_for_load_state("networkidle", timeout=5000)
+            except Exception:
+                logger.info("[api_via_page] networkidle timeout, proceeding anyway")
+            logger.info(f"[api_via_page] Page URL: {page.url}")
 
-            for attempt in range(3):
-                logger.info(f"[api_via_page] Fetching {api_url} (attempt {attempt+1})")
-                result = page.evaluate("""async (url) => {
-                    try {
-                        const r = await fetch(url);
-                        if (r.status === 429) return { _error: 429, _retry: true };
-                        if (!r.ok) return { _error: r.status };
-                        return await r.json();
-                    } catch(e) {
-                        return { _error: e.message };
-                    }
-                }""", api_url)
+            logger.info(f"[api_via_page] Fetching {api_url}")
+            result = page.evaluate("""async (url) => {
+                try {
+                    const c = new AbortController();
+                    const t = setTimeout(() => c.abort(), 8000);
+                    const r = await fetch(url, { signal: c.signal });
+                    clearTimeout(t);
+                    if (!r.ok) return { _error: r.status };
+                    return await r.json();
+                } catch(e) {
+                    return { _error: e.message };
+                }
+            }""", api_url)
 
-                if result and result.get("_retry"):
-                    logger.warning(f"[api_via_page] Rate limited (429), waiting...")
-                    time.sleep(3 * (attempt + 1))
-                    continue
-                if result and "_error" not in result:
-                    logger.info(f"[api_via_page] Success")
-                    return result
-                logger.warning(f"[api_via_page] Failed: {result}")
-                break
+            if result and "_error" not in result:
+                logger.info(f"[api_via_page] Success, articles: {len(result.get('articleList', []))}")
+                return result
+            logger.warning(f"[api_via_page] Failed: {result}")
             return None
         except Exception as e:
             logger.error(f"[api_via_page] Error: {e}")
