@@ -20,7 +20,6 @@ _pw_instance = None
 _browser_instance = None
 
 LAND_OLD = "https://land.naver.com"
-LAND_NEW = "https://fin.land.naver.com"
 
 
 def _ensure_browser():
@@ -164,41 +163,70 @@ def _scrape_complex_info_old(apt_name: str) -> dict | None:
             page.context.close()
 
 
-def _fetch_api_via_page(complex_no: str, api_url: str) -> dict | list | None:
+def _fetch_listings_old_domain(apt_name: str, complex_no: str) -> list[dict]:
+    """Fetch listings via land.naver.com (old domain) article search.
+
+    Navigates to the article search page and intercepts the articleSearch.naver
+    AJAX response. This endpoint is NOT rate-limited unlike new.land.naver.com.
+    """
     with _lock:
         page = _make_page()
         try:
-            target = f"{LAND_NEW}/complexes/{complex_no}"
-            logger.info(f"[api_via_page] Navigating to {target}")
-            page.goto(target, wait_until="load", timeout=10000)
-            try:
-                page.wait_for_load_state("networkidle", timeout=5000)
-            except Exception:
-                logger.info("[api_via_page] networkidle timeout, proceeding anyway")
-            logger.info(f"[api_via_page] Page URL: {page.url}")
+            captured = [None]
 
-            logger.info(f"[api_via_page] Fetching {api_url}")
-            result = page.evaluate("""async (url) => {
-                try {
-                    const c = new AbortController();
-                    const t = setTimeout(() => c.abort(), 8000);
-                    const r = await fetch(url, { signal: c.signal });
-                    clearTimeout(t);
-                    if (!r.ok) return { _error: r.status };
-                    return await r.json();
-                } catch(e) {
-                    return { _error: e.message };
-                }
-            }""", api_url)
+            def on_response(response):
+                if "articleSearch.naver" in response.url:
+                    try:
+                        captured[0] = response.json()
+                    except Exception:
+                        pass
 
-            if result and "_error" not in result:
-                logger.info(f"[api_via_page] Success, articles: {len(result.get('articleList', []))}")
-                return result
-            logger.warning(f"[api_via_page] Failed: {result}")
-            return None
+            page.on("response", on_response)
+
+            url = f"{LAND_OLD}/search/article.naver?tab=article&query={apt_name}"
+            logger.info(f"[listings_old] Navigating to {url}")
+            page.goto(url, wait_until="networkidle", timeout=20000)
+            time.sleep(2)
+
+            if not captured[0]:
+                logger.warning(f"[listings_old] No articleSearch response for {apt_name}")
+                return []
+
+            info = captured[0].get("articleInfo", {})
+            articles = info.get("cfmArticleList", [])
+            total = info.get("cfmArticleCount", 0)
+            logger.info(f"[listings_old] Total: {total}, page returned: {len(articles)}")
+
+            # Filter by complexCode to get exact apartment match
+            matched = [a for a in articles if str(a.get("complexCode")) == str(complex_no)]
+            logger.info(f"[listings_old] Matched complexCode={complex_no}: {len(matched)}")
+
+            listings = []
+            for a in matched:
+                trade_type = a.get("tradeTypeCodeName", "")
+                price_display = a.get("price", a.get("basePrice", ""))
+
+                listings.append({
+                    "articleNo": a.get("articleNumber", ""),
+                    "articleName": a.get("articleName", ""),
+                    "tradeType": trade_type,
+                    "price": price_display,
+                    "area": float(a.get("size2", 0) or 0),
+                    "areaSupply": float(a.get("size1", 0) or 0),
+                    "areaName": f"{a.get('size1', '')}㎡",
+                    "floor": a.get("floor", ""),
+                    "building": a.get("building", ""),
+                    "direction": "",
+                    "articleConfirmYmd": a.get("registYmd", ""),
+                    "articleFeatureDesc": a.get("articleDescription", ""),
+                    "realtorName": a.get("realterName", ""),
+                    "cpName": a.get("cpName", ""),
+                })
+
+            return listings
         except Exception as e:
-            logger.error(f"[api_via_page] Error: {e}")
-            return None
+            logger.error(f"[listings_old] Error fetching {apt_name}: {e}")
+            return []
         finally:
             page.context.close()
 
@@ -249,53 +277,18 @@ def save_listings_cache(apt_id: str, listings: list[dict]):
 
 
 def get_listings(apt_id: str) -> list[dict]:
-    # Check cache first (synced data has no TTL limit, self-scraped has 30min)
-    cache = _read_cache(f"listings_{apt_id}")
+    # Check cache first (30min TTL for scraped data)
+    cache = _read_cache(f"listings_{apt_id}", CACHE_TTL_SHORT)
     if cache and "listings" in cache:
+        logger.info(f"[get_listings] Returning {len(cache['listings'])} cached listings for {apt_id}")
         return cache["listings"]
 
-    # Try scraping from server (works on Korean IP, fails on overseas)
     apt = APARTMENTS.get(apt_id)
     if not apt or "complex_no" not in apt:
         return []
 
-    complex_no = apt["complex_no"]
-
-    url = (
-        f"https://new.land.naver.com/api/articles/complex/{complex_no}"
-        f"?realEstateType=APT&tradeType=&page=1&sizePerPage=50"
-    )
-    data = _fetch_api_via_page(complex_no, url)
-
-    if not data:
-        url2 = (
-            f"{LAND_NEW}/front-api/v1/article/list"
-            f"?complexNumber={complex_no}&tradeType=&page=0&size=50"
-        )
-        data = _fetch_api_via_page(complex_no, url2)
-
-    if not data:
-        return []
-
-    articles = data.get("articleList", [])
-    if not articles and "result" in data:
-        articles = data["result"] if isinstance(data["result"], list) else []
-
-    listings = []
-    for a in articles:
-        listings.append({
-            "articleNo": a.get("articleNo", a.get("itemId", "")),
-            "articleName": a.get("articleName", a.get("complexName", "")),
-            "tradeType": a.get("tradeTypeName", a.get("tradeType", "")),
-            "price": a.get("dealOrWarrantPrc", a.get("price", "")),
-            "area": a.get("area2", a.get("exclusiveArea", 0)),
-            "areaName": a.get("areaName", ""),
-            "floor": a.get("floorInfo", a.get("floor", "")),
-            "direction": a.get("direction", ""),
-            "articleConfirmYmd": a.get("articleConfirmYmd", a.get("confirmDate", "")),
-            "articleFeatureDesc": a.get("articleFeatureDesc", a.get("description", "")),
-            "realtorName": a.get("realtorName", ""),
-        })
+    # Use old land.naver.com domain (not rate-limited)
+    listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
 
     if listings:
         _write_cache(f"listings_{apt_id}", {"listings": listings})
@@ -308,18 +301,7 @@ def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
         cache.pop("_cached_at", None)
         return cache
 
-    apt = APARTMENTS.get(apt_id)
-    if not apt or "complex_no" not in apt:
-        return None
-
-    complex_no = apt["complex_no"]
-    url = (
-        f"https://new.land.naver.com/api/complexes/{complex_no}/prices"
-        f"?complexNo={complex_no}&tradeType=A1&year={years}"
-        f"&priceChartChange=true&areaNo=&type=chart"
-    )
-    data = _fetch_api_via_page(complex_no, url)
-
-    if data:
-        _write_cache(f"trend_{apt_id}", data)
-    return data
+    # Price trend from new.land.naver.com is likely rate-limited
+    # Return None gracefully - the dashboard shows 실거래가 chart instead
+    logger.info(f"[get_price_trend] No cached trend for {apt_id}, skipping (rate-limited)")
+    return None

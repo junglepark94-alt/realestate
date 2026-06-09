@@ -177,6 +177,34 @@ tr:hover td {
   font-size: 13px;
 }
 
+/* Trade type badges */
+.trade-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.trade-badge.sale {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.trade-badge.lease {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.trade-badge.rent {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
 /* Loading */
 .loading {
   text-align: center;

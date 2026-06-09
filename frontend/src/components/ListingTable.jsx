@@ -32,11 +32,10 @@ function ListingTable({ aptId, aptName }) {
         <table>
           <thead>
             <tr>
-              <th>매물명</th>
-              <th>가격</th>
-              <th>면적</th>
-              <th>층</th>
-              <th>방향</th>
+              <th>거래</th>
+              <th>가격(만원)</th>
+              <th>면적(㎡)</th>
+              <th>동/층</th>
               <th>확인일</th>
               <th>특징</th>
             </tr>
@@ -44,11 +43,14 @@ function ListingTable({ aptId, aptName }) {
           <tbody>
             {listings.map((l) => (
               <tr key={l.articleNo}>
-                <td>{l.articleName}</td>
+                <td>
+                  <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : l.tradeType === '전세' ? 'lease' : 'rent'}`}>
+                    {l.tradeType}
+                  </span>
+                </td>
                 <td className="price">{l.price}</td>
-                <td>{l.area ? `${Number(l.area).toFixed(1)}㎡` : l.areaName}</td>
-                <td>{l.floor}</td>
-                <td>{l.direction}</td>
+                <td>{l.area ? `${Number(l.area).toFixed(1)}` : ''}{l.areaSupply ? ` / ${Number(l.areaSupply).toFixed(1)}` : ''}</td>
+                <td>{l.building ? `${l.building} ` : ''}{l.floor}</td>
                 <td>{l.articleConfirmYmd}</td>
                 <td className="feature">{l.articleFeatureDesc}</td>
               </tr>
