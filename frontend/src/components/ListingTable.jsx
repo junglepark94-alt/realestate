@@ -15,20 +15,20 @@ function formatSinglePrice(s) {
 }
 
 const TRADE_TABS = [
-  { key: 'all', label: '전체' },
   { key: '매매', label: '매매' },
   { key: '전세', label: '전세' },
+  { key: 'all', label: '전체' },
 ];
 
 function ListingTable({ aptName, listings, loading, error }) {
-  const [tradeFilter, setTradeFilter] = useState('all');
+  const [tradeFilter, setTradeFilter] = useState('매매');
+  const [popupText, setPopupText] = useState(null);
 
   const filtered = useMemo(() => {
     if (tradeFilter === 'all') return listings;
     return listings.filter((l) => l.tradeType === tradeFilter);
   }, [listings, tradeFilter]);
 
-  // Count per trade type for badge numbers
   const counts = useMemo(() => {
     const m = { all: listings.length, '매매': 0, '전세': 0 };
     for (const l of listings) {
@@ -47,7 +47,7 @@ function ListingTable({ aptName, listings, loading, error }) {
   );
 
   return (
-    <div className="card">
+    <div className="card listing-card">
       <div className="listing-header">
         <h3>매매/전세 매물</h3>
         <div className="trade-filter">
@@ -63,37 +63,47 @@ function ListingTable({ aptName, listings, loading, error }) {
           ))}
         </div>
       </div>
+
       {filtered.length === 0 ? (
         <p className="empty-text">해당 조건의 매물이 없습니다</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>거래</th>
-              <th>가격</th>
-              <th>면적(㎡)</th>
-              <th>동/층</th>
-              <th>확인일</th>
-              <th>특징</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((l) => (
-              <tr key={l.articleNo}>
-                <td>
-                  <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : 'lease'}`}>
-                    {l.tradeType}
-                  </span>
-                </td>
-                <td className="price">{formatPriceToEok(l.price)}</td>
-                <td>{l.area ? `${Number(l.area).toFixed(1)}` : ''}{l.areaSupply ? ` / ${Number(l.areaSupply).toFixed(1)}` : ''}</td>
-                <td>{l.building ? `${l.building} ` : ''}{l.floor}</td>
-                <td>{l.articleConfirmYmd}</td>
-                <td className="feature">{l.articleFeatureDesc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="listing-list">
+          {filtered.map((l) => (
+            <div
+              key={l.articleNo}
+              className="listing-row"
+              onClick={() => l.articleFeatureDesc && setPopupText(l.articleFeatureDesc)}
+            >
+              <div className="listing-main">
+                <span className="listing-price price">{formatPriceToEok(l.price)}</span>
+                <span className={`trade-badge ${l.tradeType === '매매' ? 'sale' : 'lease'}`}>
+                  {l.tradeType}
+                </span>
+              </div>
+              <div className="listing-meta">
+                <span>{l.area ? `${Number(l.area).toFixed(0)}㎡` : ''}</span>
+                <span className="dot" />
+                <span>{l.building ? `${l.building} ` : ''}{l.floor}</span>
+                <span className="dot" />
+                <span>{l.articleConfirmYmd}</span>
+                {l.articleFeatureDesc && <span className="listing-has-desc">i</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Feature popup overlay */}
+      {popupText && (
+        <div className="popup-overlay" onClick={() => setPopupText(null)}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <div className="popup-header">
+              <span>매물 특징</span>
+              <button className="popup-close" onClick={() => setPopupText(null)}>&times;</button>
+            </div>
+            <p>{popupText}</p>
+          </div>
+        </div>
       )}
     </div>
   );

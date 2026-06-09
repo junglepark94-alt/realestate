@@ -387,10 +387,231 @@ tbody tr:last-child td {
 }
 
 /* ===== Chart Area ===== */
+.chart-wrap {
+  margin: 0 -8px;
+}
+
+.h3-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text);
+  margin-left: 8px;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.chart-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
 .recent-transactions {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--border-light);
+}
+
+.recent-transactions h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tx-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+
+.tx-row:last-child {
+  border-bottom: none;
+}
+
+.tx-date {
+  color: var(--text);
+  font-size: 12px;
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.tx-price {
+  font-weight: 600;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.tx-info {
+  color: var(--text);
+  font-size: 12px;
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ===== Listing Card Layout ===== */
+.listing-card {
+  position: relative;
+}
+
+.listing-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  gap: 8px;
+}
+
+.listing-row:last-child {
+  border-bottom: none;
+}
+
+.listing-row:active {
+  background: var(--accent-bg);
+}
+
+.listing-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.listing-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.listing-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text);
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listing-meta .dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--text);
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.listing-has-desc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+/* ===== Popup Overlay ===== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.popup-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.popup-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.popup-close:hover {
+  color: var(--text-h);
+}
+
+.popup-content p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* ===== Footer ===== */
@@ -410,7 +631,10 @@ tbody tr:last-child td {
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
   .dashboard {
-    padding: 16px 16px 48px;
+    padding: 16px 12px 48px;
+  }
+  .dashboard-header {
+    margin-bottom: 24px;
   }
   .dashboard-header h1 {
     font-size: 17px;
@@ -426,30 +650,136 @@ tbody tr:last-child td {
     font-size: 12px;
   }
   .tab-bar {
-    gap: 4px;
+    gap: 2px;
+    padding: 3px;
   }
   .tab {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .apt-card-body {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .card {
-    padding: 16px;
-  }
-  table {
+    padding: 7px 6px;
     font-size: 12px;
-  }
-  th, td {
-    padding: 8px;
-  }
-  .listing-header {
-    flex-direction: column;
-    align-items: flex-start;
   }
   .area-filter {
     flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  .area-tab {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .card {
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+  }
+  .card h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  /* Apt card compact */
+  .apt-card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .apt-card-header {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    gap: 6px;
+  }
+  .apt-card-header h2 {
+    font-size: 16px;
+  }
+  .apt-location {
+    font-size: 12px;
+  }
+  .apt-card-body {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .apt-stat .label {
+    font-size: 10px;
+  }
+  .apt-stat .value {
+    font-size: 13px;
+  }
+
+  /* Chart mobile */
+  .chart-wrap {
+    margin: 0 -4px;
+  }
+  .h3-sub {
+    font-size: 11px;
+    margin-left: 6px;
+  }
+  .chart-legend {
+    gap: 12px;
+    font-size: 11px;
+  }
+
+  /* Recent transactions compact */
+  .recent-transactions {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .tx-row {
+    padding: 6px 0;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .tx-date {
+    font-size: 11px;
+    min-width: 64px;
+  }
+  .tx-info {
+    font-size: 11px;
+  }
+
+  /* Listing card mobile */
+  .listing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .trade-filter {
+    width: 100%;
+  }
+  .trade-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+  .listing-row {
+    padding: 8px 0;
+    gap: 6px;
+  }
+  .listing-price {
+    font-size: 14px;
+  }
+  .listing-meta {
+    font-size: 11px;
+    gap: 3px;
+  }
+  .trade-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+
+  /* Popup mobile */
+  .popup-overlay {
+    padding: 16px;
+    align-items: flex-end;
+  }
+  .popup-content {
+    max-width: 100%;
+    border-radius: 14px 14px 10px 10px;
+  }
+
+  /* Footer compact */
+  .dashboard-footer {
+    padding-top: 24px;
+    margin-top: 12px;
+    font-size: 11px;
   }
 }
