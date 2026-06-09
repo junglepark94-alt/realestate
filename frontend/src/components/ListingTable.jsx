@@ -1,3 +1,25 @@
+/**
+ * Convert 만원 price string to 억 format.
+ * "132,000" → "13.2억"
+ * "50,000" → "5.0억"
+ * "8,000/190" (전세 보증금/월세) → "0.8억/190"
+ */
+function formatPriceToEok(priceStr) {
+  if (!priceStr) return '';
+  // Handle slash-separated prices (보증금/월세)
+  if (priceStr.includes('/')) {
+    const parts = priceStr.split('/');
+    return parts.map(formatSinglePrice).join(' / ');
+  }
+  return formatSinglePrice(priceStr);
+}
+
+function formatSinglePrice(s) {
+  const num = Number(s.replace(/,/g, ''));
+  if (isNaN(num) || num === 0) return s;
+  return `${(num / 10000).toFixed(1)}억`;
+}
+
 function ListingTable({ aptName, listings, loading, error }) {
   if (loading) return <div className="card loading">매물 로딩중...</div>;
   if (error) return (
@@ -17,7 +39,7 @@ function ListingTable({ aptName, listings, loading, error }) {
           <thead>
             <tr>
               <th>거래</th>
-              <th>가격(만원)</th>
+              <th>가격</th>
               <th>면적(㎡)</th>
               <th>동/층</th>
               <th>확인일</th>
@@ -32,7 +54,7 @@ function ListingTable({ aptName, listings, loading, error }) {
                     {l.tradeType}
                   </span>
                 </td>
-                <td className="price">{l.price}</td>
+                <td className="price">{formatPriceToEok(l.price)}</td>
                 <td>{l.area ? `${Number(l.area).toFixed(1)}` : ''}{l.areaSupply ? ` / ${Number(l.areaSupply).toFixed(1)}` : ''}</td>
                 <td>{l.building ? `${l.building} ` : ''}{l.floor}</td>
                 <td>{l.articleConfirmYmd}</td>

@@ -1,4 +1,4 @@
-function ApartmentCard({ apartment }) {
+function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
   const info = apartment.naverInfo;
 
   return (
@@ -41,11 +41,15 @@ function ApartmentCard({ apartment }) {
           )}
           <div className="apt-stat">
             <span className="label">매매 매물</span>
-            <span className="value highlight">{info.dealCount}건</span>
+            <span className="value highlight">
+              {listingsLoading ? '...' : `${dealCount}건`}
+            </span>
           </div>
           <div className="apt-stat">
             <span className="label">전세 매물</span>
-            <span className="value">{info.leaseCount}건</span>
+            <span className="value">
+              {listingsLoading ? '...' : `${leaseCount}건`}
+            </span>
           </div>
         </div>
       ) : (

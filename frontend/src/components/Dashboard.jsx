@@ -31,6 +31,9 @@ function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const selected = apartments.find((a) => a.id === selectedApt);
+  const hiddenTypes = selected?.hiddenAreaTypes || [];
+
   // Load transactions + listings when apartment changes
   useEffect(() => {
     if (!selectedApt) return;
@@ -51,15 +54,17 @@ function Dashboard() {
       .finally(() => setListingsLoading(false));
   }, [selectedApt]);
 
-  // Extract available area types from both data sources
+  // Extract available area types, excluding hidden ones
   const availableTypes = useMemo(() => {
     const txTypes = txData?.transactions ? extractAreaTypes(txData.transactions) : [];
     const listingTypes = extractAreaTypes(listings);
     const merged = new Set([...txTypes, ...listingTypes]);
-    return [...merged].sort((a, b) => Number(a) - Number(b));
-  }, [txData, listings]);
+    return [...merged]
+      .filter((t) => !hiddenTypes.includes(t))
+      .sort((a, b) => Number(a) - Number(b));
+  }, [txData, listings, hiddenTypes]);
 
-  // Auto-select first available type when apartment changes
+  // Auto-select first available type when apartment changes or types update
   useEffect(() => {
     if (availableTypes.length > 0 && !availableTypes.includes(areaType)) {
       setAreaType(availableTypes[0]);
@@ -99,6 +104,17 @@ function Dashboard() {
     });
   }, [listings, areaType]);
 
+  // Compute deal/lease counts from all listings (not filtered by area)
+  const listingCounts = useMemo(() => {
+    let dealCount = 0;
+    let leaseCount = 0;
+    for (const l of listings) {
+      if (l.tradeType === '매매') dealCount++;
+      else if (l.tradeType === '전세') leaseCount++;
+    }
+    return { dealCount, leaseCount };
+  }, [listings]);
+
   if (loading) {
     return (
       <div className="dashboard">
@@ -109,8 +125,6 @@ function Dashboard() {
       </div>
     );
   }
-
-  const selected = apartments.find((a) => a.id === selectedApt);
 
   return (
     <div className="dashboard">
@@ -133,7 +147,12 @@ function Dashboard() {
 
       {selected && (
         <div className="dashboard-content">
-          <ApartmentCard apartment={selected} />
+          <ApartmentCard
+            apartment={selected}
+            dealCount={listingCounts.dealCount}
+            leaseCount={listingCounts.leaseCount}
+            listingsLoading={listingsLoading}
+          />
 
           {/* Area type filter */}
           {availableTypes.length > 0 && (

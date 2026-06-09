@@ -33,6 +33,7 @@ def apartments():
             "dong": apt["dong"],
             "gu": apt["gu"],
             "complexNo": apt.get("complex_no"),
+            "hiddenAreaTypes": apt.get("hidden_area_types", []),
             "naverInfo": info,
         })
     return jsonify(result)

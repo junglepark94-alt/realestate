@@ -29,6 +29,7 @@ APARTMENTS = {
         "lawd_cd": "11380",
         "complex_no": "111964",
         "search_names": ["힐스테이트녹번", "힐스테이트 녹번"],
+        "hidden_area_types": ["39", "49"],
         "info": {
             "address": "서울시 은평구 녹번동",
             "totalHouseholdCount": 952,
