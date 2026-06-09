@@ -136,15 +136,27 @@ function Dashboard() {
         <p className="subtitle">도윤집 마련 프로젝트</p>
       </header>
 
-      <div className="tab-bar">
-        {apartments.map((apt) => (
-          <button
-            key={apt.id}
-            className={`tab ${apt.id === selectedApt ? 'active' : ''}`}
-            onClick={() => setSelectedApt(apt.id)}
-          >
-            {apt.name}
-          </button>
+      <div className="tab-bar-grouped">
+        {Object.entries(
+          apartments.reduce((acc, apt) => {
+            (acc[apt.gu] = acc[apt.gu] || []).push(apt);
+            return acc;
+          }, {})
+        ).map(([gu, apts]) => (
+          <div key={gu} className="tab-group">
+            <span className="tab-group-label">{gu}</span>
+            <div className="tab-group-tabs">
+              {apts.map((apt) => (
+                <button
+                  key={apt.id}
+                  className={`tab ${apt.id === selectedApt ? 'active' : ''}`}
+                  onClick={() => setSelectedApt(apt.id)}
+                >
+                  {apt.name}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 

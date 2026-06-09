@@ -44,23 +44,41 @@
 }
 
 /* ===== Apartment Tabs ===== */
-.tab-bar {
+.tab-bar-grouped {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 24px;
+}
+
+.tab-group {
   background: var(--surface);
-  padding: 4px;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--border);
+}
+
+.tab-group-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-light);
+  padding: 0 6px 4px;
+  letter-spacing: 0.02em;
+}
+
+.tab-group-tabs {
+  display: flex;
+  gap: 4px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-.tab-bar::-webkit-scrollbar { display: none; }
+.tab-group-tabs::-webkit-scrollbar { display: none; }
 
 .tab {
   flex: 0 0 auto;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
   border-radius: 7px;
   background: transparent;
@@ -669,12 +687,23 @@ tbody tr:last-child td {
     margin-left: 40px;
     font-size: 12px;
   }
-  .tab-bar {
+  .tab-bar-grouped {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .tab-group {
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+  .tab-group-label {
+    font-size: 10px;
+    padding: 0 4px 2px;
+  }
+  .tab-group-tabs {
     gap: 2px;
-    padding: 3px;
   }
   .tab {
-    padding: 7px 6px;
+    padding: 6px 10px;
     font-size: 12px;
   }
   .area-filter {
