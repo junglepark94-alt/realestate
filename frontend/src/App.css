@@ -1,223 +1,261 @@
-/* Dashboard Layout */
+/* ===== Layout ===== */
 .dashboard {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px 24px 64px;
 }
 
+/* ===== Header ===== */
 .dashboard-header {
-  text-align: center;
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid var(--border);
+  margin-bottom: 36px;
+}
+
+.dashboard-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.dashboard-header .brand-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .dashboard-header h1 {
-  font-size: 28px;
-  margin: 0 0 8px;
-  letter-spacing: -0.5px;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-h);
 }
 
 .subtitle {
   color: var(--text);
-  font-size: 15px;
+  font-size: 14px;
+  margin: 2px 0 0 46px;
 }
 
-/* Tab Bar */
+/* ===== Apartment Tabs ===== */
 .tab-bar {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 24px;
-  flex-wrap: wrap;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
 }
 
 .tab {
-  padding: 10px 24px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
   color: var(--text);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  font-family: var(--sans);
+  transition: all 0.15s ease;
 }
 
 .tab:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  background: var(--code-bg);
+  color: var(--text-h);
 }
 
 .tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--primary);
   color: #fff;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
 }
 
-/* Area Filter */
+/* ===== Area Filter ===== */
 .area-filter {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 }
 
 .area-filter-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  margin-right: 4px;
+  margin-right: 2px;
 }
 
 .area-tab {
-  padding: 6px 16px;
+  padding: 5px 14px;
   border: 1.5px solid var(--border);
   border-radius: 20px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
-  font-family: var(--sans);
+  transition: all 0.15s ease;
 }
 
 .area-tab:hover {
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 .area-tab.active {
-  background: #6366f1;
-  border-color: #6366f1;
+  background: var(--primary);
+  border-color: var(--primary);
   color: #fff;
 }
 
-/* Cards */
+/* ===== Cards ===== */
 .card {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .card h3 {
   margin: 0 0 16px;
-  font-size: 18px;
+  font-size: 15px;
   color: var(--text-h);
   font-weight: 600;
 }
 
 .card h4 {
   margin: 20px 0 12px;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-h);
+  font-weight: 600;
 }
 
-/* Apartment Card */
+/* ===== Apartment Info Card ===== */
 .apt-card {
-  background: linear-gradient(135deg, #667eea10, #764ba210);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .apt-card-header {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .apt-card-header h2 {
-  font-size: 22px;
+  font-size: 18px;
+  font-weight: 700;
   margin: 0;
 }
 
 .apt-location {
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .apt-card-body {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
 }
 
 .apt-stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .apt-stat .label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text);
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
 }
 
 .apt-stat .value {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-h);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .apt-stat .value.highlight {
-  color: #3b82f6;
+  color: var(--primary);
   font-weight: 700;
 }
 
-/* Tables */
+/* ===== Tables ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-thead {
-  background: var(--code-bg);
-}
-
-th {
+thead th {
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
-  color: var(--text-h);
-  font-size: 13px;
+  color: var(--text);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid var(--border);
   white-space: nowrap;
 }
 
 td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-h);
+  font-weight: 400;
 }
 
-tr:hover td {
+tbody tr {
+  transition: background 0.1s ease;
+}
+
+tbody tr:hover td {
   background: var(--accent-bg);
 }
 
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .price {
-  color: #dc2626;
+  color: var(--red);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .feature {
-  max-width: 200px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  color: var(--text);
+  font-size: 12px;
 }
 
-/* Listing header + trade filter */
+/* ===== Listing Header + Trade Filter ===== */
 .listing-header {
   display: flex;
   align-items: center;
@@ -234,39 +272,42 @@ tr:hover td {
 .trade-filter {
   display: flex;
   gap: 4px;
+  background: var(--code-bg);
+  padding: 3px;
+  border-radius: 8px;
 }
 
 .trade-tab {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 14px;
-  border: 1.5px solid var(--border);
+  padding: 5px 12px;
+  border: none;
   border-radius: 6px;
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
-  font-family: var(--sans);
+  transition: all 0.15s ease;
 }
 
 .trade-tab:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  background: var(--surface);
+  color: var(--text-h);
 }
 
 .trade-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fff;
+  background: var(--surface);
+  color: var(--text-h);
+  box-shadow: var(--shadow-sm);
 }
 
 .trade-count {
   font-size: 11px;
   font-weight: 700;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--border);
+  color: var(--text);
   padding: 1px 6px;
   border-radius: 10px;
   min-width: 18px;
@@ -274,42 +315,41 @@ tr:hover td {
 }
 
 .trade-tab.active .trade-count {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
-/* Trade type badges */
+/* ===== Trade Badges ===== */
 .trade-badge {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .trade-badge.sale {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--red-light);
+  color: var(--red);
 }
 
 .trade-badge.lease {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: var(--blue-light);
+  color: var(--blue);
 }
 
 .trade-badge.rent {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: var(--green-light);
+  color: var(--green);
 }
 
-/* Loading */
+/* ===== Loading States ===== */
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 48px 24px;
   color: var(--text);
+  font-size: 14px;
 }
 
 .loading-screen {
@@ -322,12 +362,12 @@ tr:hover td {
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: 3px solid var(--border);
-  border-top-color: #3b82f6;
+  border-top-color: var(--primary);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
@@ -337,36 +377,79 @@ tr:hover td {
 .empty-text {
   text-align: center;
   color: var(--text);
-  padding: 24px;
+  padding: 32px 24px;
+  font-size: 14px;
 }
 
 .loading-text {
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* Recent Transactions */
+/* ===== Chart Area ===== */
 .recent-transactions {
-  margin-top: 16px;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ===== Footer ===== */
+.dashboard-footer {
+  text-align: center;
+  padding: 32px 0 0;
+  margin-top: 16px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.dashboard-footer span {
+  opacity: 0.6;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
   .dashboard {
-    padding: 12px;
+    padding: 16px 16px 48px;
   }
   .dashboard-header h1 {
-    font-size: 22px;
+    font-size: 17px;
+  }
+  .dashboard-header .brand-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+  .subtitle {
+    margin-left: 40px;
+    font-size: 12px;
+  }
+  .tab-bar {
+    gap: 4px;
+  }
+  .tab {
+    padding: 8px 12px;
+    font-size: 13px;
   }
   .apt-card-body {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .card {
+    padding: 16px;
   }
   table {
     font-size: 12px;
   }
   th, td {
-    padding: 6px 8px;
+    padding: 8px;
+  }
+  .listing-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .area-filter {
+    flex-wrap: wrap;
   }
 }

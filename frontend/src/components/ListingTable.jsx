@@ -41,7 +41,7 @@ function ListingTable({ aptName, listings, loading, error }) {
   if (loading) return <div className="card loading">매물 로딩중...</div>;
   if (error) return (
     <div className="card">
-      <h3>🏠 {aptName} 현재 매물</h3>
+      <h3>현재 매물</h3>
       <p className="empty-text">네이버 부동산 접속 제한으로 매물 정보를 불러올 수 없습니다</p>
     </div>
   );
@@ -49,7 +49,7 @@ function ListingTable({ aptName, listings, loading, error }) {
   return (
     <div className="card">
       <div className="listing-header">
-        <h3>🏠 {aptName} 매매/전세 매물</h3>
+        <h3>매매/전세 매물</h3>
         <div className="trade-filter">
           {TRADE_TABS.map((t) => (
             <button

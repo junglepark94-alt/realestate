@@ -129,8 +129,11 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>아파트 실거래가 & 매물 대시보드</h1>
-        <p className="subtitle">관심 아파트의 실거래가 추이와 현재 매물을 한눈에</p>
+        <div className="brand">
+          <div className="brand-icon">D</div>
+          <h1>종걸응경 협동조합</h1>
+        </div>
+        <p className="subtitle">도윤집 마련 프로젝트</p>
       </header>
 
       <div className="tab-bar">
@@ -184,6 +187,10 @@ function Dashboard() {
           />
         </div>
       )}
+
+      <footer className="dashboard-footer">
+        <span>종걸응경 협동조합 &middot; 도윤집 마련 프로젝트</span>
+      </footer>
     </div>
   );
 }

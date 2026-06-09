@@ -10,7 +10,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
   if (!data || !data.summary?.length) {
     return (
       <div className="card">
-        <h3>📊 {aptName} 실거래가 추이 — {areaType}㎡</h3>
+        <h3>실거래가 추이 &middot; {areaType}㎡</h3>
         <p className="empty-text">해당 면적의 실거래 데이터가 없습니다</p>
       </div>
     );
@@ -18,7 +18,7 @@ function TransactionChart({ aptName, data, loading, areaType }) {
 
   return (
     <div className="card">
-      <h3>📊 {aptName} 실거래가 추이 — {areaType}㎡ (최근 24개월)</h3>
+      <h3>실거래가 추이 &middot; {areaType}㎡ <span style={{fontWeight: 400, color: 'var(--text)', fontSize: '13px'}}>최근 24개월</span></h3>
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data.summary} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -29,9 +29,9 @@ function TransactionChart({ aptName, data, loading, areaType }) {
             labelFormatter={(l) => `${l}`}
           />
           <Legend />
-          <Line type="monotone" dataKey="avg" name="평균" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
-          <Line type="monotone" dataKey="max" name="최고" stroke="#dc2626" strokeWidth={1} strokeDasharray="4 4" />
-          <Line type="monotone" dataKey="min" name="최저" stroke="#16a34a" strokeWidth={1} strokeDasharray="4 4" />
+          <Line type="monotone" dataKey="avg" name="평균" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
+          <Line type="monotone" dataKey="max" name="최고" stroke="#f43f5e" strokeWidth={1} strokeDasharray="4 4" dot={false} />
+          <Line type="monotone" dataKey="min" name="최저" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} />
         </LineChart>
       </ResponsiveContainer>
 
