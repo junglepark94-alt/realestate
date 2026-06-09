@@ -1,0 +1,55 @@
+import { useState, useEffect } from 'react';
+import { fetchListings } from '../api';
+
+function ListingTable({ aptId, aptName }) {
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchListings(aptId)
+      .then((d) => setListings(d.listings || []))
+      .catch(() => setListings([]))
+      .finally(() => setLoading(false));
+  }, [aptId]);
+
+  if (loading) return <div className="card loading">매물 로딩중...</div>;
+
+  return (
+    <div className="card">
+      <h3>🏠 {aptName} 현재 매물 ({listings.length}건)</h3>
+      {listings.length === 0 ? (
+        <p className="empty-text">현재 등록된 매물이 없습니다</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>매물명</th>
+              <th>가격</th>
+              <th>면적</th>
+              <th>층</th>
+              <th>방향</th>
+              <th>확인일</th>
+              <th>특징</th>
+            </tr>
+          </thead>
+          <tbody>
+            {listings.map((l) => (
+              <tr key={l.articleNo}>
+                <td>{l.articleName}</td>
+                <td className="price">{l.price}</td>
+                <td>{l.area ? `${Number(l.area).toFixed(1)}㎡` : l.areaName}</td>
+                <td>{l.floor}</td>
+                <td>{l.direction}</td>
+                <td>{l.articleConfirmYmd}</td>
+                <td className="feature">{l.articleFeatureDesc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+export default ListingTable;
