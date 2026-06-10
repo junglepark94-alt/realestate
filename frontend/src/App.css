@@ -168,44 +168,25 @@
   color: var(--text-light);
 }
 
-/* ===== Apartment Tabs ===== */
-.tab-bar-grouped {
+/* ===== Tab Bar: gu chips + apartment chips (sticky, all sizes) ===== */
+.tab-bar {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+  margin: 0 -24px 18px;
+  padding: 12px 24px;
 }
-
-.tab-group {
-  background: var(--surface);
-  padding: 8px 10px;
-  border-radius: 16px;
-}
-
-.tab-group-label {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-light);
-  padding: 0 6px 4px;
-  letter-spacing: 0.02em;
-}
-
-.tab-group-tabs {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.tab-group-tabs::-webkit-scrollbar { display: none; }
 
 .tab {
   flex: 0 0 auto;
   padding: 9px 16px;
   border: none;
-  border-radius: 10px;
-  background: transparent;
+  border-radius: 12px;
+  background: var(--surface);
   color: var(--text);
   font-size: 14px;
   font-weight: 600;
@@ -214,8 +195,8 @@
 }
 
 .tab:hover {
-  background: var(--code-bg);
-  color: var(--text-h);
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 .tab:active {
@@ -225,11 +206,6 @@
 .tab.active {
   background: var(--primary);
   color: #fff;
-}
-
-/* ===== Mobile Tab Bar (hidden on desktop) ===== */
-.tab-bar-mobile {
-  display: none;
 }
 
 .gu-chips,
@@ -254,6 +230,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.gu-chip:hover {
+  color: var(--text-h);
+  box-shadow: inset 0 0 0 1.5px var(--border);
 }
 
 .gu-chip:active {
@@ -946,30 +927,14 @@ tbody tr:last-child td {
     margin-left: 40px;
     font-size: 12px;
   }
-  /* Hide desktop grouped tabs, show mobile two-row tabs */
-  .tab-bar-grouped {
-    display: none;
-  }
-  .tab-bar-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: var(--bg);
+  /* Tab bar: tighter bleed/padding on mobile */
+  .tab-bar {
     margin: 0 -12px 14px;
     padding: 10px 12px;
   }
   .apt-chips .tab {
-    background: var(--surface);
     padding: 10px 15px;
     font-size: 13px;
-    border-radius: 12px;
-  }
-  .apt-chips .tab.active {
-    background: var(--primary);
-    color: #fff;
   }
   .area-filter {
     flex-wrap: wrap;

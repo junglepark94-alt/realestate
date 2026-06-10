@@ -177,33 +177,8 @@ function Dashboard() {
 
       {!compareMode && (
       <>
-      {/* Desktop: all apartments grouped by gu */}
-      <div className="tab-bar-grouped">
-        {Object.entries(
-          apartments.reduce((acc, apt) => {
-            (acc[apt.gu] = acc[apt.gu] || []).push(apt);
-            return acc;
-          }, {})
-        ).map(([gu, apts]) => (
-          <div key={gu} className="tab-group">
-            <span className="tab-group-label">{gu}</span>
-            <div className="tab-group-tabs">
-              {apts.map((apt) => (
-                <button
-                  key={apt.id}
-                  className={`tab ${apt.id === selectedApt ? 'active' : ''}`}
-                  onClick={() => setSelectedApt(apt.id)}
-                >
-                  {apt.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile: gu chip row + apartment chip row */}
-      <div className="tab-bar-mobile">
+      {/* Two-row tab bar: gu chip row + apartment chip row (all screen sizes) */}
+      <div className="tab-bar">
         <div className="gu-chips">
           {gus.map((gu) => (
             <button
