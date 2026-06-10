@@ -5,7 +5,10 @@ import {
 import { areaLabel } from '../utils/areaType';
 
 const formatPrice = (v) => `${(v / 10000).toFixed(1)}억`;
-const formatAxisPrice = (v) => `${(v / 10000).toFixed(0)}`;
+const formatAxisPrice = (v) => {
+  const eok = v / 10000;
+  return Number.isInteger(eok) ? `${eok}` : eok.toFixed(1);
+};
 
 function TransactionChart({ aptName, data, loading, areaType }) {
   if (loading) {
@@ -55,8 +58,9 @@ function TransactionChart({ aptName, data, loading, areaType }) {
               tick={{ fontSize: 11, fill: '#8b95a1' }}
               tickLine={false}
               axisLine={false}
-              width={32}
+              width={42}
               unit="억"
+              domain={['auto', 'auto']}
             />
             <Tooltip
               formatter={(v, name) => [formatPrice(v), name]}

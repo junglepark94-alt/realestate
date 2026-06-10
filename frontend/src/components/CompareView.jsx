@@ -10,7 +10,10 @@ const COLORS = ['#3182f6', '#f04452', '#00c473', '#9263f8'];
 const MAX_SELECT = 4;
 
 const formatPrice = (v) => `${(v / 10000).toFixed(1)}억`;
-const formatAxisPrice = (v) => `${(v / 10000).toFixed(0)}`;
+const formatAxisPrice = (v) => {
+  const eok = v / 10000;
+  return Number.isInteger(eok) ? `${eok}` : eok.toFixed(1);
+};
 
 function CompareView({ apartments, initialId }) {
   const [selectedIds, setSelectedIds] = useState(initialId ? [initialId] : []);
@@ -173,7 +176,7 @@ function CompareView({ apartments, initialId }) {
                     tick={{ fontSize: 11, fill: '#8b95a1' }}
                     tickLine={false}
                     axisLine={false}
-                    width={32}
+                    width={42}
                     unit="억"
                     domain={['auto', 'auto']}
                   />
