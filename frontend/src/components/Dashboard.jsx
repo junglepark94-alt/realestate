@@ -5,6 +5,7 @@ import ApartmentCard from './ApartmentCard';
 import StatSummary from './StatSummary';
 import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
+import CompareView from './CompareView';
 
 function Dashboard() {
   const [apartments, setApartments] = useState([]);
@@ -24,6 +25,9 @@ function Dashboard() {
 
   // Mobile gu browser (which gu's apartments are shown in the mobile tab row)
   const [guFilter, setGuFilter] = useState(null);
+
+  // Compare mode
+  const [compareMode, setCompareMode] = useState(false);
 
   // Load apartment list
   useEffect(() => {
@@ -152,13 +156,27 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <div className="brand">
-          <div className="brand-icon">D</div>
-          <h1>종걸응경 협동조합</h1>
+        <div className="header-row">
+          <div className="brand">
+            <div className="brand-icon">D</div>
+            <h1>종걸응경 협동조합</h1>
+          </div>
+          <button
+            className={`compare-toggle ${compareMode ? 'on' : ''}`}
+            onClick={() => setCompareMode(!compareMode)}
+          >
+            {compareMode ? '돌아가기' : '비교'}
+          </button>
         </div>
         <p className="subtitle">도윤집 마련 프로젝트</p>
       </header>
 
+      {compareMode && (
+        <CompareView apartments={apartments} initialId={selectedApt} />
+      )}
+
+      {!compareMode && (
+      <>
       {/* Desktop: all apartments grouped by gu */}
       <div className="tab-bar-grouped">
         {Object.entries(
@@ -259,6 +277,8 @@ function Dashboard() {
             updatedAt={listingsUpdatedAt}
           />
         </div>
+      )}
+      </>
       )}
 
       <footer className="dashboard-footer">

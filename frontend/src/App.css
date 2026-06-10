@@ -44,6 +44,130 @@
   margin: 2px 0 0 46px;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.compare-toggle {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.compare-toggle:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.compare-toggle:active {
+  transform: scale(0.95);
+}
+
+.compare-toggle.on {
+  background: var(--text-h);
+  color: #fff;
+}
+
+/* ===== Compare View ===== */
+.compare-group {
+  margin-bottom: 12px;
+}
+
+.compare-group:last-child {
+  margin-bottom: 0;
+}
+
+.compare-group-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+
+.compare-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compare-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: none;
+  border-radius: 18px;
+  background: var(--code-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.compare-chip:active {
+  transform: scale(0.95);
+}
+
+.compare-chip.active {
+  background: var(--primary-light);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.chip-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.compare-legend {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compare-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.compare-legend-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.compare-legend-price {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-legend-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-light);
+}
+
 /* ===== Apartment Tabs ===== */
 .tab-bar-grouped {
   display: flex;
