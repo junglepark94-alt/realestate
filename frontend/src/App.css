@@ -21,24 +21,25 @@
   width: 36px;
   height: 36px;
   background: var(--primary);
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  font-weight: 800;
   color: #fff;
   flex-shrink: 0;
 }
 
 .dashboard-header h1 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 21px;
+  font-weight: 800;
   margin: 0;
   color: var(--text-h);
 }
 
 .subtitle {
-  color: var(--text);
+  color: var(--text-light);
   font-size: 14px;
   margin: 2px 0 0 46px;
 }
@@ -53,9 +54,8 @@
 
 .tab-group {
   background: var(--surface);
-  padding: 6px 8px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  padding: 8px 10px;
+  border-radius: 16px;
 }
 
 .tab-group-label {
@@ -78,15 +78,15 @@
 
 .tab {
   flex: 0 0 auto;
-  padding: 8px 16px;
+  padding: 9px 16px;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .tab:hover {
@@ -94,10 +94,13 @@
   color: var(--text-h);
 }
 
+.tab:active {
+  transform: scale(0.96);
+}
+
 .tab.active {
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
 }
 
 /* ===== Area Filter ===== */
@@ -116,61 +119,60 @@
 }
 
 .area-tab {
-  padding: 5px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 18px;
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .area-tab:hover {
-  border-color: var(--primary);
   color: var(--primary);
   background: var(--primary-light);
 }
 
+.area-tab:active {
+  transform: scale(0.96);
+}
+
 .area-tab.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
 }
 
 /* ===== Cards ===== */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
 }
 
 .card h3 {
   margin: 0 0 16px;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-h);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .card h4 {
   margin: 20px 0 12px;
   font-size: 14px;
   color: var(--text-h);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ===== Apartment Info Card ===== */
 .apt-card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
 }
 
 .apt-card-header {
@@ -183,13 +185,13 @@
 }
 
 .apt-card-header h2 {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   margin: 0;
 }
 
 .apt-location {
-  color: var(--text);
+  color: var(--text-light);
   font-size: 13px;
 }
 
@@ -206,11 +208,9 @@
 }
 
 .apt-stat .label {
-  font-size: 11px;
-  color: var(--text);
+  font-size: 12px;
+  color: var(--text-light);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .apt-stat .value {
@@ -235,11 +235,9 @@ thead th {
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-light);
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
@@ -263,9 +261,25 @@ tbody tr:last-child td {
 }
 
 .price {
-  color: var(--red);
-  font-weight: 600;
+  color: var(--text-h);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* 등락 표시: 빨강=상승, 파랑=하락 */
+.delta-up {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.delta-down {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.delta-flat {
+  color: var(--text-light);
+  font-weight: 600;
 }
 
 .feature {
@@ -303,15 +317,19 @@ tbody tr:last-child td {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+.trade-tab:active {
+  transform: scale(0.97);
 }
 
 .trade-tab:hover {
@@ -322,7 +340,7 @@ tbody tr:last-child td {
 .trade-tab.active {
   background: var(--surface);
   color: var(--text-h);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 4px rgba(25, 31, 40, 0.1);
 }
 
 .trade-count {
@@ -345,10 +363,9 @@ tbody tr:last-child td {
 .trade-badge {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-weight: 700;
 }
 
 .trade-badge.sale {
@@ -470,7 +487,7 @@ tbody tr:last-child td {
 }
 
 .tx-date {
-  color: var(--text);
+  color: var(--text-light);
   font-size: 12px;
   min-width: 72px;
   flex-shrink: 0;
@@ -483,7 +500,7 @@ tbody tr:last-child td {
 }
 
 .tx-info {
-  color: var(--text);
+  color: var(--text-light);
   font-size: 12px;
   margin-left: auto;
   text-align: right;
@@ -516,7 +533,8 @@ tbody tr:last-child td {
 }
 
 .listing-row:active {
-  background: var(--accent-bg);
+  background: var(--border-light);
+  transform: scale(0.99);
 }
 
 .listing-main {
@@ -529,7 +547,7 @@ tbody tr:last-child td {
 .listing-price {
   font-size: 15px;
   font-weight: 700;
-  color: var(--red);
+  color: var(--text-h);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -539,7 +557,7 @@ tbody tr:last-child td {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: var(--text);
+  color: var(--text-light);
   flex-wrap: nowrap;
   justify-content: flex-end;
   white-space: nowrap;
@@ -574,18 +592,22 @@ tbody tr:last-child td {
 
 .listing-link {
   margin-left: auto;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
   background: var(--primary-light);
   color: var(--primary);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .listing-link:hover {
   background: var(--primary);
   color: #fff;
+}
+.listing-link:active {
+  transform: scale(0.94);
 }
 
 /* ===== Popup Overlay ===== */

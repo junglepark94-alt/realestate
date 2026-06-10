@@ -33,17 +33,17 @@ function TransactionChart({ aptName, data, loading, areaType }) {
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={chartData} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-light)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f2f4f6" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 11, fill: 'var(--text)' }}
+              tick={{ fontSize: 11, fill: '#8b95a1' }}
               tickLine={false}
-              axisLine={{ stroke: 'var(--border)' }}
+              axisLine={{ stroke: '#e5e8eb' }}
               interval="preserveStartEnd"
             />
             <YAxis
               tickFormatter={formatAxisPrice}
-              tick={{ fontSize: 11, fill: 'var(--text)' }}
+              tick={{ fontSize: 11, fill: '#8b95a1' }}
               tickLine={false}
               axisLine={false}
               width={32}
@@ -54,23 +54,23 @@ function TransactionChart({ aptName, data, loading, areaType }) {
               labelFormatter={(l) => `20${l.replace('.', '년 ')}월`}
               contentStyle={{
                 fontSize: '13px',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                boxShadow: 'var(--shadow-md)',
+                borderRadius: '12px',
+                border: 'none',
+                boxShadow: '0 8px 24px rgba(25, 31, 40, 0.12)',
               }}
             />
-            <Line type="monotone" dataKey="avg" name="평균" stroke="#6366f1" strokeWidth={2} dot={{ r: 2.5, fill: '#6366f1' }} />
-            <Line type="monotone" dataKey="max" name="최고" stroke="#f43f5e" strokeWidth={1} strokeDasharray="4 4" dot={false} />
-            <Line type="monotone" dataKey="min" name="최저" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} />
+            <Line type="monotone" dataKey="avg" name="평균" stroke="#3182f6" strokeWidth={2.5} dot={{ r: 2.5, fill: '#3182f6', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+            <Line type="monotone" dataKey="max" name="최고" stroke="#f04452" strokeWidth={1} strokeDasharray="4 4" dot={false} />
+            <Line type="monotone" dataKey="min" name="최저" stroke="#00c473" strokeWidth={1} strokeDasharray="4 4" dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Legend inline */}
       <div className="chart-legend">
-        <span><i style={{background:'#6366f1'}} />평균</span>
-        <span><i style={{background:'#f43f5e'}} />최고</span>
-        <span><i style={{background:'#22c55e'}} />최저</span>
+        <span><i style={{background:'#3182f6'}} />평균</span>
+        <span><i style={{background:'#f04452'}} />최고</span>
+        <span><i style={{background:'#00c473'}} />최저</span>
       </div>
 
       {data.transactions?.length > 0 && (

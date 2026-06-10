@@ -1,36 +1,45 @@
 :root {
-  --text: #64748b;
-  --text-h: #0f172a;
-  --bg: #f8fafc;
+  /* Toss gray scale */
+  --text: #4e5968;
+  --text-light: #8b95a1;
+  --text-h: #191f28;
+  --bg: #f2f4f6;
   --surface: #ffffff;
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
-  --code-bg: #f1f5f9;
-  --primary: #6366f1;
-  --primary-light: #eef2ff;
-  --primary-border: #c7d2fe;
-  --accent-bg: rgba(99, 102, 241, 0.04);
-  --red: #ef4444;
-  --red-light: #fef2f2;
-  --blue: #3b82f6;
-  --blue-light: #eff6ff;
-  --green: #22c55e;
-  --green-light: #f0fdf4;
+  --border: #e5e8eb;
+  --border-light: #f2f4f6;
+  --code-bg: #f2f4f6;
+
+  /* Toss blue */
+  --primary: #3182f6;
+  --primary-dark: #1b64da;
+  --primary-light: #e8f3ff;
+  --primary-border: #c9e2ff;
+  --accent-bg: rgba(49, 130, 246, 0.05);
+
+  /* Semantic: red=상승, blue=하락 (Korean finance convention) */
+  --red: #f04452;
+  --red-light: #fdebed;
+  --blue: #3182f6;
+  --blue-light: #e8f3ff;
+  --green: #00c473;
+  --green-light: #e5f9f0;
 
   --sans: 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow-sm: none;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(25, 31, 40, 0.12);
 
   font: 15px/1.6 var(--sans);
+  letter-spacing: -0.02em;
   color-scheme: light;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
 *,
@@ -56,4 +65,5 @@ h1, h2, h3, h4 {
 
 button {
   font-family: var(--sans);
+  letter-spacing: -0.02em;
 }
