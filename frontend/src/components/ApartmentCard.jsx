@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { areasWithPyeong } from '../utils/areaType';
 
 function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
   const info = apartment.naverInfo;
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   return (
     <div className="apt-card">
@@ -15,9 +17,21 @@ function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
           src={`/apt/${apartment.id}.jpg`}
           alt={apartment.name}
           loading="lazy"
+          onClick={() => setPhotoOpen(true)}
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       </div>
+
+      {photoOpen && (
+        <div className="photo-overlay" onClick={() => setPhotoOpen(false)}>
+          <img
+            className="photo-overlay-img"
+            src={`/apt/${apartment.id}.jpg`}
+            alt={apartment.name}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
       {info ? (
         <div className="apt-card-body">
           <div className="apt-stat">

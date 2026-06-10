@@ -416,6 +416,38 @@
   border-radius: 12px;
   flex-shrink: 0;
   background: var(--code-bg);
+  cursor: zoom-in;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.apt-photo:hover {
+  opacity: 0.9;
+}
+
+.apt-photo:active {
+  transform: scale(0.97);
+}
+
+.photo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  cursor: zoom-out;
+  animation: fadeIn 0.15s ease;
+}
+
+.photo-overlay-img {
+  max-width: min(92vw, 900px);
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.2s ease;
 }
 
 .apt-card-header h2 {
