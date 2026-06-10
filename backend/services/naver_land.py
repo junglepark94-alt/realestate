@@ -71,14 +71,17 @@ def _read_cache_any(key: str) -> tuple[dict | None, bool]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         cached_at = datetime.fromisoformat(data.get("_cached_at", "2000-01-01"))
-        expired = datetime.now() - cached_at > CACHE_TTL
+        if cached_at.tzinfo is None:
+            cached_at = cached_at.astimezone()
+        expired = datetime.now().astimezone() - cached_at > CACHE_TTL
         return data, expired
     except Exception:
         return None, True
 
 
 def _write_cache(key: str, data: dict):
-    data["_cached_at"] = datetime.now().isoformat()
+    # tz-aware timestamp so the frontend can render it in the user's timezone
+    data["_cached_at"] = datetime.now().astimezone().isoformat()
     path = CACHE_DIR / f"{key}.json"
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -189,6 +192,14 @@ def get_listings(apt_id: str) -> list[dict]:
         return cache["listings"]
     # No cache yet (server just deployed) — return empty, scheduler will fill it
     return []
+
+
+def get_listings_with_meta(apt_id: str) -> dict:
+    """Listings + cache timestamp for the '업데이트' indicator."""
+    cache = _read_cache(f"listings_{apt_id}")
+    if cache and "listings" in cache:
+        return {"listings": cache["listings"], "updatedAt": cache.get("_cached_at")}
+    return {"listings": [], "updatedAt": None}
 
 
 def get_price_trend(apt_id: str, years: int = 5) -> dict | None:

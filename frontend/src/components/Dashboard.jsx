@@ -17,6 +17,7 @@ function Dashboard() {
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(false);
   const [listingsError, setListingsError] = useState(false);
+  const [listingsUpdatedAt, setListingsUpdatedAt] = useState(null);
 
   // Area filter
   const [areaType, setAreaType] = useState('59');
@@ -66,8 +67,12 @@ function Dashboard() {
     setListingsLoading(true);
     setListingsError(false);
     setListings([]);
+    setListingsUpdatedAt(null);
     fetchListings(selectedApt)
-      .then((d) => setListings(d.listings || []))
+      .then((d) => {
+        setListings(d.listings || []);
+        setListingsUpdatedAt(d.updatedAt || null);
+      })
       .catch(() => { setListings([]); setListingsError(true); })
       .finally(() => setListingsLoading(false));
   }, [selectedApt]);
@@ -251,12 +256,14 @@ function Dashboard() {
             listings={filteredListings}
             loading={listingsLoading}
             error={listingsError}
+            updatedAt={listingsUpdatedAt}
           />
         </div>
       )}
 
       <footer className="dashboard-footer">
         <span>종걸응경 협동조합 &middot; 도윤집 마련 프로젝트</span>
+        <span>실거래가·매물 데이터는 매일 06:00에 자동 업데이트됩니다</span>
       </footer>
     </div>
   );

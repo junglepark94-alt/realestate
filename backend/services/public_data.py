@@ -48,7 +48,9 @@ def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = F
         try:
             cached = json.loads(cache_path.read_text(encoding="utf-8"))
             cached_at = datetime.fromisoformat(cached.get("_cached_at", "2000-01-01"))
-            if datetime.now() - cached_at < CACHE_TTL_TRANSACTIONS:
+            if cached_at.tzinfo is None:
+                cached_at = cached_at.astimezone()
+            if datetime.now().astimezone() - cached_at < CACHE_TTL_TRANSACTIONS:
                 logger.info(f"[transactions] Cache hit for {apt_name_key} ({len(cached['data'])} items)")
                 return cached["data"]
         except Exception:
@@ -91,9 +93,9 @@ def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = F
 
     all_items.sort(key=lambda x: x["date"])
 
-    # Write cache
+    # Write cache (tz-aware timestamp)
     cache_path.write_text(
-        json.dumps({"_cached_at": datetime.now().isoformat(), "data": all_items}, ensure_ascii=False),
+        json.dumps({"_cached_at": datetime.now().astimezone().isoformat(), "data": all_items}, ensure_ascii=False),
         encoding="utf-8",
     )
     logger.info(f"[transactions] Refreshed & cached {len(all_items)} items for {apt_name_key}")

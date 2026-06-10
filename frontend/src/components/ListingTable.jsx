@@ -21,7 +21,16 @@ const TRADE_TABS = [
   { key: 'all', label: '전체' },
 ];
 
-function ListingTable({ aptName, listings, loading, error }) {
+function formatUpdatedAt(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${d.getMonth() + 1}.${d.getDate()} ${hh}:${mi} 업데이트`;
+}
+
+function ListingTable({ aptName, listings, loading, error, updatedAt }) {
   const [tradeFilter, setTradeFilter] = useState('매매');
   const [popupText, setPopupText] = useState(null);
 
@@ -59,7 +68,10 @@ function ListingTable({ aptName, listings, loading, error }) {
   return (
     <div className="card listing-card">
       <div className="listing-header">
-        <h3>매매/전세 매물</h3>
+        <h3>
+          매매/전세 매물
+          {updatedAt && <span className="h3-sub">{formatUpdatedAt(updatedAt)}</span>}
+        </h3>
         <div className="trade-filter">
           {TRADE_TABS.map((t) => (
             <button

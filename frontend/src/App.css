@@ -796,7 +796,9 @@ tbody tr:last-child td {
 }
 
 .dashboard-footer span {
+  display: block;
   opacity: 0.6;
+  line-height: 1.8;
 }
 
 /* ===== Responsive ===== */

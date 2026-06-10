@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
-from services.naver_land import get_complex_info, get_listings, get_price_trend, save_listings_cache
+from services.naver_land import get_complex_info, get_listings_with_meta, get_price_trend, save_listings_cache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,11 +60,11 @@ def listings(apt_id):
         return jsonify({"error": "아파트를 찾을 수 없습니다"}), 404
 
     try:
-        data = get_listings(apt_id)
+        data = get_listings_with_meta(apt_id)
     except Exception as e:
-        logging.error(f"get_listings({apt_id}) failed: {e}")
-        data = []
-    return jsonify({"listings": data})
+        logging.error(f"get_listings_with_meta({apt_id}) failed: {e}")
+        data = {"listings": [], "updatedAt": None}
+    return jsonify(data)
 
 
 @app.route("/api/price-trend/<apt_id>")
