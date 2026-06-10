@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { fetchApartments, fetchTransactions, fetchListings } from '../api';
 import { getAreaType, extractAreaTypes, areaLabel } from '../utils/areaType';
 import ApartmentCard from './ApartmentCard';
+import StatSummary from './StatSummary';
 import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
 
@@ -184,6 +185,14 @@ function Dashboard() {
               ))}
             </div>
           )}
+
+          <StatSummary
+            txData={filteredTxData}
+            listings={listings}
+            areaType={areaType}
+            txLoading={txLoading}
+            listingsLoading={listingsLoading}
+          />
 
           <TransactionChart
             aptName={selected.name}

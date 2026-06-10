@@ -145,6 +145,79 @@
   font-weight: 700;
 }
 
+/* ===== Stat Summary ===== */
+.stat-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-h);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Skeleton Loading ===== */
+.skeleton {
+  background: linear-gradient(90deg, #f2f4f6 25%, #e9edf1 50%, #f2f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 13px;
+}
+
+.skeleton-title {
+  height: 24px;
+}
+
+.skeleton-block {
+  height: 180px;
+  border-radius: 12px;
+}
+
+.skeleton-row {
+  height: 38px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
 /* ===== Cards ===== */
 .card {
   background: var(--surface);
@@ -772,6 +845,41 @@ tbody tr:last-child td {
   }
   .apt-stat .value {
     font-size: 13px;
+  }
+
+  /* Stat summary mobile: rows inside one card */
+  .stat-summary {
+    grid-template-columns: 1fr;
+    gap: 0;
+    background: var(--surface);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .stat-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-radius: 0;
+    padding: 13px 16px;
+    gap: 2px 10px;
+  }
+  .stat-box + .stat-box {
+    border-top: 1px solid var(--border-light);
+  }
+  .stat-box .stat-label {
+    flex: 0 0 auto;
+    font-size: 13px;
+  }
+  .stat-box .stat-value {
+    font-size: 18px;
+    margin-left: auto;
+  }
+  .stat-box .stat-sub {
+    flex-basis: 100%;
+    text-align: right;
+    font-size: 11px;
   }
 
   /* Chart mobile */
