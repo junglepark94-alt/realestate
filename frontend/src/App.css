@@ -103,6 +103,44 @@
   color: #fff;
 }
 
+/* ===== Mobile Tab Bar (hidden on desktop) ===== */
+.tab-bar-mobile {
+  display: none;
+}
+
+.gu-chips,
+.apt-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.gu-chips::-webkit-scrollbar,
+.apt-chips::-webkit-scrollbar { display: none; }
+
+.gu-chip {
+  flex: 0 0 auto;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.gu-chip:active {
+  transform: scale(0.95);
+}
+
+.gu-chip.active {
+  background: var(--text-h);
+  color: #fff;
+}
+
 /* ===== Area Filter ===== */
 .area-filter {
   display: flex;
@@ -782,32 +820,38 @@ tbody tr:last-child td {
     margin-left: 40px;
     font-size: 12px;
   }
+  /* Hide desktop grouped tabs, show mobile two-row tabs */
   .tab-bar-grouped {
-    gap: 6px;
-    margin-bottom: 16px;
+    display: none;
   }
-  .tab-group {
-    padding: 4px 6px;
-    border-radius: 8px;
+  .tab-bar-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    margin: 0 -12px 14px;
+    padding: 10px 12px;
   }
-  .tab-group-label {
-    font-size: 10px;
-    padding: 0 4px 2px;
+  .apt-chips .tab {
+    background: var(--surface);
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 12px;
   }
-  .tab-group-tabs {
-    gap: 2px;
-  }
-  .tab {
-    padding: 6px 10px;
-    font-size: 12px;
+  .apt-chips .tab.active {
+    background: var(--primary);
+    color: #fff;
   }
   .area-filter {
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
     margin-bottom: 14px;
   }
   .area-tab {
-    padding: 4px 10px;
+    padding: 8px 13px;
     font-size: 12px;
   }
   .card {
@@ -930,7 +974,7 @@ tbody tr:last-child td {
     font-size: 12px;
   }
   .listing-row {
-    padding: 8px 0;
+    padding: 11px 0;
     gap: 6px;
   }
   .listing-price {
@@ -943,6 +987,13 @@ tbody tr:last-child td {
   .trade-badge {
     font-size: 10px;
     padding: 1px 6px;
+  }
+  .listing-link {
+    padding: 7px 12px;
+    border-radius: 10px;
+  }
+  .trade-tab {
+    padding: 9px 8px;
   }
 
   /* Popup mobile */
@@ -960,5 +1011,13 @@ tbody tr:last-child td {
     padding-top: 24px;
     margin-top: 12px;
     font-size: 11px;
+  }
+
+  /* iPhone safe area */
+  .dashboard {
+    padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+  .popup-overlay {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 }

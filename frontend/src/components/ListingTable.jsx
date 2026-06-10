@@ -39,7 +39,16 @@ function ListingTable({ aptName, listings, loading, error }) {
     return m;
   }, [listings]);
 
-  if (loading) return <div className="card loading">매물 로딩중...</div>;
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="skeleton skeleton-title" style={{ width: 130, marginBottom: 18 }} />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div className="skeleton skeleton-row" key={i} />
+        ))}
+      </div>
+    );
+  }
   if (error) return (
     <div className="card">
       <h3>현재 매물</h3>

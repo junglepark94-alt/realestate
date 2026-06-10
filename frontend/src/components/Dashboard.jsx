@@ -21,6 +21,9 @@ function Dashboard() {
   // Area filter
   const [areaType, setAreaType] = useState('59');
 
+  // Mobile gu browser (which gu's apartments are shown in the mobile tab row)
+  const [guFilter, setGuFilter] = useState(null);
+
   // Load apartment list
   useEffect(() => {
     fetchApartments()
@@ -34,6 +37,20 @@ function Dashboard() {
 
   const selected = apartments.find((a) => a.id === selectedApt);
   const hiddenTypes = selected?.hiddenAreaTypes || [];
+  const gus = useMemo(() => [...new Set(apartments.map((a) => a.gu))], [apartments]);
+  const activeGu = guFilter || selected?.gu;
+
+  // Auto-scroll active tab / gu chip into view (horizontal scroll lists)
+  useEffect(() => {
+    document.querySelectorAll('.tab.active').forEach((el) => {
+      el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    });
+  }, [selectedApt]);
+
+  useEffect(() => {
+    const chip = document.querySelector('.gu-chip.active');
+    if (chip) chip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [activeGu]);
 
   // Load transactions + listings when apartment changes
   useEffect(() => {
@@ -137,6 +154,7 @@ function Dashboard() {
         <p className="subtitle">도윤집 마련 프로젝트</p>
       </header>
 
+      {/* Desktop: all apartments grouped by gu */}
       <div className="tab-bar-grouped">
         {Object.entries(
           apartments.reduce((acc, apt) => {
@@ -159,6 +177,34 @@ function Dashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Mobile: gu chip row + apartment chip row */}
+      <div className="tab-bar-mobile">
+        <div className="gu-chips">
+          {gus.map((gu) => (
+            <button
+              key={gu}
+              className={`gu-chip ${gu === activeGu ? 'active' : ''}`}
+              onClick={() => setGuFilter(gu)}
+            >
+              {gu}
+            </button>
+          ))}
+        </div>
+        <div className="apt-chips">
+          {apartments
+            .filter((apt) => apt.gu === activeGu)
+            .map((apt) => (
+              <button
+                key={apt.id}
+                className={`tab ${apt.id === selectedApt ? 'active' : ''}`}
+                onClick={() => setSelectedApt(apt.id)}
+              >
+                {apt.name}
+              </button>
+            ))}
+        </div>
       </div>
 
       {selected && (

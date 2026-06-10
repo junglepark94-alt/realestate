@@ -8,7 +8,16 @@ const formatPrice = (v) => `${(v / 10000).toFixed(1)}억`;
 const formatAxisPrice = (v) => `${(v / 10000).toFixed(0)}`;
 
 function TransactionChart({ aptName, data, loading, areaType }) {
-  if (loading) return <div className="card loading">실거래가 로딩중...</div>;
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="skeleton skeleton-title" style={{ width: 150, marginBottom: 18 }} />
+        <div className="skeleton skeleton-block" />
+        <div className="skeleton skeleton-row" style={{ marginTop: 18 }} />
+        <div className="skeleton skeleton-row" />
+      </div>
+    );
+  }
   if (!data || !data.summary?.length) {
     return (
       <div className="card">
