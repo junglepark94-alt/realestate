@@ -6,8 +6,17 @@ function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
   return (
     <div className="apt-card">
       <div className="apt-card-header">
-        <h2>{apartment.name}</h2>
-        <span className="apt-location">{apartment.gu} {apartment.dong}</span>
+        <div className="apt-card-title">
+          <h2>{apartment.name}</h2>
+          <span className="apt-location">{apartment.gu} {apartment.dong}</span>
+        </div>
+        <img
+          className="apt-photo"
+          src={`/apt/${apartment.id}.jpg`}
+          alt={apartment.name}
+          loading="lazy"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
       </div>
       {info ? (
         <div className="apt-card-body">

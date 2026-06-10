@@ -393,11 +393,29 @@
 
 .apt-card-header {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-light);
+}
+
+.apt-card-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.apt-photo {
+  width: 112px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: var(--code-bg);
 }
 
 .apt-card-header h2 {
@@ -963,10 +981,15 @@ tbody tr:last-child td {
   .apt-card-header {
     margin-bottom: 14px;
     padding-bottom: 12px;
-    gap: 6px;
+    gap: 10px;
   }
   .apt-card-header h2 {
     font-size: 16px;
+  }
+  .apt-photo {
+    width: 92px;
+    height: 64px;
+    border-radius: 10px;
   }
   .apt-location {
     font-size: 12px;
