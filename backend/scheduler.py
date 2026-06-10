@@ -66,7 +66,9 @@ def refresh_all():
                 # Listings run on main refresh thread (Playwright has its own lock)
                 try:
                     logger.info(f"[scheduler] Refreshing listings for {apt_id}")
-                    listings = _fetch_listings_old_domain(apt["name"], apt["complex_no"])
+                    listings = _fetch_listings_old_domain(
+                        apt["name"], apt["complex_no"], query=apt.get("naver_query")
+                    )
                     if listings:
                         _write_cache(f"listings_{apt_id}", {"listings": listings})
                         logger.info(f"[scheduler] {apt_id} listings: {len(listings)}")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 import time
@@ -86,16 +88,24 @@ def _write_cache(key: str, data: dict):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _fetch_listings_old_domain(apt_name: str, complex_no: str) -> list[dict]:
+MAX_LISTING_PAGES = 35  # safety cap: 35 pages x 20 = 700 articles per query (이문 3개 단지 666건 커버)
+
+
+def _fetch_listings_old_domain(apt_name: str, complex_no: str, query: str = None) -> list[dict]:
     """Fetch listings via land.naver.com (old domain) article search.
 
     Navigates to the article search page and intercepts the articleSearch.naver
     AJAX response. This endpoint is NOT rate-limited unlike new.land.naver.com.
+    Fetches additional pages (page=2..N) via in-page POSTs in the same session.
+    `query` overrides the search keyword (e.g. full complex name) when the
+    display name alone does not resolve to the complex on Naver.
     """
+    search_query = query or apt_name
     with _lock:
         page = _make_page()
         try:
             captured = [None]
+            post_body = [None]
 
             def on_response(response):
                 if "articleSearch.naver" in response.url:
@@ -104,21 +114,68 @@ def _fetch_listings_old_domain(apt_name: str, complex_no: str) -> list[dict]:
                     except Exception:
                         pass
 
-            page.on("response", on_response)
+            def on_request(request):
+                if "articleSearch.naver" in request.url:
+                    post_body[0] = request.post_data
 
-            url = f"{LAND_OLD}/search/article.naver?tab=article&query={apt_name}"
+            page.on("response", on_response)
+            page.on("request", on_request)
+
+            url = f"{LAND_OLD}/search/article.naver?tab=article&query={search_query}"
             logger.info(f"[listings_old] Navigating to {url}")
             page.goto(url, wait_until="networkidle", timeout=20000)
             time.sleep(2)
 
             if not captured[0]:
-                logger.warning(f"[listings_old] No articleSearch response for {apt_name}")
+                logger.warning(f"[listings_old] No articleSearch response for {search_query}")
                 return []
 
             info = captured[0].get("articleInfo", {})
-            articles = info.get("cfmArticleList", [])
+            articles = list(info.get("cfmArticleList", []))
             total = info.get("cfmArticleCount", 0)
-            logger.info(f"[listings_old] Total: {total}, page returned: {len(articles)}")
+            logger.info(f"[listings_old] Total: {total}, page 1 returned: {len(articles)}")
+
+            # Fetch remaining pages via in-page POST (same session/cookies)
+            if post_body[0] and total > len(articles):
+                from urllib.parse import parse_qsl, urlencode
+                base_params = [(k, v) for k, v in parse_qsl(post_body[0], keep_blank_values=True)
+                               if k != "page"]
+                pg = 2
+                while len(articles) < total and pg <= MAX_LISTING_PAGES:
+                    body = urlencode(base_params + [("page", str(pg))])
+                    try:
+                        data = page.evaluate(
+                            """async (body) => {
+                                const res = await fetch('/search/articleSearch.naver', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                                    body,
+                                });
+                                return await res.json();
+                            }""",
+                            body,
+                        )
+                        more = (data or {}).get("articleInfo", {}).get("cfmArticleList", [])
+                        if not more:
+                            break
+                        articles.extend(more)
+                        logger.info(f"[listings_old] page {pg}: +{len(more)} (total {len(articles)}/{total})")
+                    except Exception as e:
+                        logger.warning(f"[listings_old] page {pg} fetch failed: {e}")
+                        break
+                    pg += 1
+                    time.sleep(0.8)
+
+            # Dedupe by articleNumber (pagination can overlap)
+            seen = set()
+            deduped = []
+            for a in articles:
+                no = a.get("articleNumber")
+                if no in seen:
+                    continue
+                seen.add(no)
+                deduped.append(a)
+            articles = deduped
 
             # Filter by complexCode to get exact apartment match
             matched = [a for a in articles if str(a.get("complexCode")) == str(complex_no)]
