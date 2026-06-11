@@ -20,19 +20,36 @@ CACHE_TTL = timedelta(days=7)
 _lock = threading.Lock()
 _pw_instance = None
 _browser_instance = None
+_pw_thread_id = None
 
 LAND_OLD = "https://land.naver.com"
 
 
 def _ensure_browser():
-    global _pw_instance, _browser_instance
-    if _browser_instance and _browser_instance.is_connected():
+    global _pw_instance, _browser_instance, _pw_thread_id
+    tid = threading.get_ident()
+    # Playwright sync API is bound to the thread that started it — a browser
+    # created by the startup-refresh thread cannot be reused from the daily
+    # scheduler thread ("cannot switch to a different thread" error).
+    if (
+        _browser_instance
+        and _browser_instance.is_connected()
+        and _pw_thread_id == tid
+    ):
         return _browser_instance
+    if _pw_instance:
+        try:
+            _pw_instance.stop()
+        except Exception:
+            pass
+        _pw_instance = None
+        _browser_instance = None
     _pw_instance = sync_playwright().start()
     _browser_instance = _pw_instance.chromium.launch(
         headless=True,
         args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"],
     )
+    _pw_thread_id = tid
     return _browser_instance
 
 
