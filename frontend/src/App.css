@@ -1,3 +1,16 @@
+/* ===== Notice banner ===== */
+.notice-banner {
+  width: 100%;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 9px 16px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
 /* ===== Layout ===== */
 .dashboard {
   max-width: 960px;
