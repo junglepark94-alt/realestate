@@ -404,4 +404,26 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 114㎡",
         },
     },
+    "byeoksan-blooming-1": {
+        "name": "벽산블루밍1단지",
+        "dong": "신월동",  # 신정동이 아니라 신월동
+        "gu": "양천구",
+        "lawd_cd": "11470",
+        "complex_no": "100390",
+        # 전국 동명단지가 많아 양천구로 좁혀 검색 → complexCode 필터로 단지 확정
+        "naver_query": "양천구벽산블루밍",
+        # "벽산블루밍1단지"는 "양천벽산블루밍1단지"(2006)에도 부분일치 →
+        # 준공연도(2003)로 구분
+        "search_names": ["벽산블루밍1단지"],
+        "search_dong": "신월동",
+        "search_build_year": "2003",
+        "info": {
+            "address": "서울시 양천구 신월동",
+            "totalHouseholdCount": 207,
+            "highFloor": "",
+            "useApproveYmd": "2003.12",
+            "builder": "벽산건설(주)",
+            "areas": "59㎡, 84㎡",
+        },
+    },
 }
