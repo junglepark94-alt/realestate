@@ -6,6 +6,7 @@ from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
 from services.naver_land import get_complex_info, get_listings_with_meta, get_price_trend, save_listings_cache
+import cache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,6 +17,21 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="")
 CORS(app)
+
+
+def _recent_deal_price(apt_id):
+    """Latest 매매 실거래가 (만원) from cache only — no live fetch.
+
+    Returns the most recent transaction's price across all area types, or None
+    if no transaction cache yet. Used to flag budget-friendly apartments in the
+    selector tabs.
+    """
+    for months in (24, 12):
+        c = cache.read_json(f"transactions_{apt_id}_{months}")
+        data = c.get("data") if c else None
+        if data:
+            return data[-1].get("price")  # data is sorted ascending by date
+    return None
 
 
 @app.route("/api/apartments")
@@ -34,6 +50,7 @@ def apartments():
             "gu": apt["gu"],
             "complexNo": apt.get("complex_no"),
             "hiddenAreaTypes": apt.get("hidden_area_types", []),
+            "recentPrice": _recent_deal_price(apt_id),
             "naverInfo": info,
         })
     return jsonify(result)

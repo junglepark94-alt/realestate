@@ -208,6 +208,32 @@
   color: #fff;
 }
 
+/* 최근 실거래가 11억대 이하(12억 미만) 단지 강조 */
+.tab.under-budget {
+  box-shadow: inset 0 0 0 1.5px var(--green);
+}
+.tab.under-budget:hover {
+  background: var(--green-light);
+  color: var(--green);
+}
+.tab.under-budget.active {
+  background: var(--green);
+  color: #fff;
+  box-shadow: none;
+}
+.budget-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.tab.under-budget.active .budget-dot {
+  background: #fff;
+}
+
 .gu-chips,
 .apt-chips {
   display: flex;

@@ -7,6 +7,9 @@ import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
 import CompareView from './CompareView';
 
+// 최근 실거래가가 이 값(만원) 미만이면 '11억대 이하'로 보고 단지 칩을 강조
+const UNDER_BUDGET_MANWON = 120000; // 12억
+
 function Dashboard() {
   const [apartments, setApartments] = useState([]);
   const [selectedApt, setSelectedApt] = useState(null);
@@ -193,15 +196,21 @@ function Dashboard() {
         <div className="apt-chips">
           {apartments
             .filter((apt) => apt.gu === activeGu)
-            .map((apt) => (
-              <button
-                key={apt.id}
-                className={`tab ${apt.id === selectedApt ? 'active' : ''}`}
-                onClick={() => setSelectedApt(apt.id)}
-              >
-                {apt.name}
-              </button>
-            ))}
+            .map((apt) => {
+              // 최근 실거래가 11억대 이하(12억 미만) 단지 강조
+              const underBudget =
+                apt.recentPrice != null && apt.recentPrice < UNDER_BUDGET_MANWON;
+              return (
+                <button
+                  key={apt.id}
+                  className={`tab ${apt.id === selectedApt ? 'active' : ''} ${underBudget ? 'under-budget' : ''}`}
+                  onClick={() => setSelectedApt(apt.id)}
+                >
+                  {underBudget && <i className="budget-dot" />}
+                  {apt.name}
+                </button>
+              );
+            })}
         </div>
       </div>
 
