@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import json
-import re
 import time
 import logging
 import threading
-from pathlib import Path
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 from config import APARTMENTS
+import cache
 
 logger = logging.getLogger(__name__)
 
-CACHE_DIR = Path(__file__).parent.parent / ".cache"
-CACHE_DIR.mkdir(exist_ok=True)
 # Long TTL — scheduler refreshes daily, this is just a safety net
 CACHE_TTL = timedelta(days=7)
 
@@ -72,37 +68,28 @@ def _make_page():
 
 
 def _read_cache(key: str) -> dict | None:
-    path = CACHE_DIR / f"{key}.json"
-    if not path.exists():
-        return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data
-    except Exception:
-        return None
+    return cache.read_json(key)
 
 
 def _read_cache_any(key: str) -> tuple[dict | None, bool]:
     """Read cache. Returns (data, is_expired)."""
-    path = CACHE_DIR / f"{key}.json"
-    if not path.exists():
+    data = cache.read_json(key)
+    if data is None:
         return None, True
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
         cached_at = datetime.fromisoformat(data.get("_cached_at", "2000-01-01"))
         if cached_at.tzinfo is None:
             cached_at = cached_at.astimezone()
         expired = datetime.now().astimezone() - cached_at > CACHE_TTL
         return data, expired
     except Exception:
-        return None, True
+        return data, True
 
 
 def _write_cache(key: str, data: dict):
     # tz-aware timestamp so the frontend can render it in the user's timezone
     data["_cached_at"] = datetime.now().astimezone().isoformat()
-    path = CACHE_DIR / f"{key}.json"
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    cache.write_json(key, data)
 
 
 MAX_LISTING_PAGES = 35  # safety cap: 35 pages x 20 = 700 articles per query (이문 3개 단지 666건 커버)
