@@ -233,6 +233,11 @@
 .tab.under-budget.active .budget-dot {
   background: #fff;
 }
+.budget-legend {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text-light);
+}
 
 .gu-chips,
 .apt-chips {

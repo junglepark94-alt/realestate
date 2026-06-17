@@ -214,6 +214,10 @@ function Dashboard() {
         </div>
       </div>
 
+      <p className="budget-legend">
+        <i className="budget-dot" /> 최근 실거래가 12억 미만 단지
+      </p>
+
       {selected && (
         <div className="dashboard-content">
           <ApartmentCard
