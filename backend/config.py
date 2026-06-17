@@ -318,4 +318,20 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 100㎡",
         },
     },
+    "hillstate-medialle": {
+        "name": "힐스테이트메디알레",
+        "dong": "대조동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "186117",
+        "search_names": ["힐스테이트메디알레"],
+        "info": {
+            "address": "서울시 은평구 대조동",
+            "totalHouseholdCount": 2451,
+            "highFloor": "",
+            "useApproveYmd": "2026.10",  # 입주 예정 (대조1구역 재개발)
+            "builder": "현대건설(주)",
+            "areas": "51㎡, 59㎡, 74㎡, 84㎡, 114㎡",
+        },
+    },
 }
