@@ -334,4 +334,22 @@ APARTMENTS = {
             "areas": "51㎡, 59㎡, 74㎡, 84㎡, 114㎡",
         },
     },
+    "sintri-1": {
+        "name": "신트리1단지",
+        "dong": "신정동",
+        "gu": "양천구",
+        "lawd_cd": "11470",
+        "complex_no": "672",
+        # 공공 실거래 표기는 "단지" 없이 "신트리1" → 매칭 키도 그렇게
+        "search_names": ["신트리1"],
+        "search_dong": "신정동",
+        "info": {
+            "address": "서울시 양천구 신정동",
+            "totalHouseholdCount": 997,
+            "highFloor": "",
+            "useApproveYmd": "1999.05",
+            "builder": "",
+            "areas": "49㎡, 59㎡",
+        },
+    },
 }
