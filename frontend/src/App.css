@@ -1018,6 +1018,10 @@ tbody tr:last-child td {
 
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
+  .notice-banner {
+    font-size: 11px;
+    padding: 7px 0;
+  }
   .dashboard {
     padding: 16px 12px 48px;
   }
