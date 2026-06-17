@@ -14,7 +14,7 @@
 .notice-track {
   display: inline-flex;
   width: max-content;
-  animation: notice-marquee 28s linear infinite;
+  animation: notice-marquee 160s linear infinite;
 }
 .notice-text {
   padding-right: 4rem;
@@ -24,7 +24,7 @@
   to { transform: translateX(-50%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .notice-track { animation-duration: 60s; }
+  .notice-track { animation-duration: 320s; }
 }
 
 /* ===== Layout ===== */
