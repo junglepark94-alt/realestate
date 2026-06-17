@@ -180,6 +180,10 @@ function Dashboard() {
 
       {!compareMode && (
       <>
+      <p className="budget-legend">
+        <i className="budget-dot" /> 최근 실거래가 12억 미만 단지
+      </p>
+
       {/* Two-row tab bar: gu chip row + apartment chip row (all screen sizes) */}
       <div className="tab-bar">
         <div className="gu-chips">
@@ -213,10 +217,6 @@ function Dashboard() {
             })}
         </div>
       </div>
-
-      <p className="budget-legend">
-        <i className="budget-dot" /> 최근 실거래가 12억 미만 단지
-      </p>
 
       {selected && (
         <div className="dashboard-content">
