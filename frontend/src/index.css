@@ -51,6 +51,8 @@
 body {
   margin: 0;
   background: var(--bg);
+  /* let the custom pull-to-refresh handle the gesture instead of the browser */
+  overscroll-behavior-y: contain;
 }
 
 #root {
