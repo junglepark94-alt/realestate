@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { areaLabel } from '../utils/areaType';
+import { areaLabel, supplyLabel } from '../utils/areaType';
 
 function formatPriceToEok(priceStr) {
   if (!priceStr) return '';
@@ -103,7 +103,7 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
                 </span>
               </div>
               <div className="listing-meta">
-                <span>{l.area ? areaLabel(l.area) : ''}</span>
+                <span>{l.areaSupply ? supplyLabel(l.areaSupply) : (l.area ? areaLabel(l.area) : '')}</span>
                 <span className="dot" />
                 <span>{l.building ? `${l.building} ` : ''}{l.floor}</span>
                 <span className="dot" />
