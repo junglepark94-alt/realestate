@@ -7,18 +7,36 @@ const PTR_THRESHOLD = 70; // px pull distance needed to trigger refresh
 function App() {
   const [pull, setPull] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const startX = useRef(null);
   const startY = useRef(null);
   const pullRef = useRef(0);
+  const mode = useRef(null); // null = undecided, 'pull' = vertical, 'lock' = horizontal/ignore
 
   useEffect(() => {
     const onStart = (e) => {
       // only arm when at the very top of the page
-      startY.current =
-        window.scrollY <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null;
+      if (window.scrollY <= 0 && e.touches.length === 1) {
+        startX.current = e.touches[0].clientX;
+        startY.current = e.touches[0].clientY;
+      } else {
+        startX.current = null;
+        startY.current = null;
+      }
+      mode.current = null;
     };
     const onMove = (e) => {
       if (startY.current == null) return;
       const dy = e.touches[0].clientY - startY.current;
+      const dx = e.touches[0].clientX - startX.current;
+
+      // Decide gesture direction once, after a small dead-zone, then lock it
+      if (mode.current == null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; // not enough movement yet
+        // horizontal-dominant (e.g. filter tab swipe) → ignore for the rest of gesture
+        mode.current = Math.abs(dx) > Math.abs(dy) ? 'lock' : 'pull';
+      }
+      if (mode.current !== 'pull') return;
+
       if (dy > 0 && window.scrollY <= 0) {
         const d = Math.min(dy * 0.5, 100); // resistance + cap
         pullRef.current = d;
@@ -32,6 +50,8 @@ function App() {
     const onEnd = () => {
       if (startY.current == null) return;
       startY.current = null;
+      startX.current = null;
+      mode.current = null;
       if (pullRef.current >= PTR_THRESHOLD) {
         setRefreshing(true);
         window.location.reload();
