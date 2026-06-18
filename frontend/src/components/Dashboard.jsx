@@ -45,7 +45,11 @@ function Dashboard() {
 
   const selected = apartments.find((a) => a.id === selectedApt);
   const hiddenTypes = selected?.hiddenAreaTypes || [];
-  const gus = useMemo(() => [...new Set(apartments.map((a) => a.gu))], [apartments]);
+  const gus = useMemo(() => {
+    const unique = [...new Set(apartments.map((a) => a.gu))];
+    // 양천구를 맨 좌측으로
+    return unique.sort((a, b) => (a === '양천구' ? -1 : b === '양천구' ? 1 : 0));
+  }, [apartments]);
   const activeGu = guFilter || selected?.gu;
 
   // Auto-scroll active tab / gu chip into view (horizontal scroll lists)
