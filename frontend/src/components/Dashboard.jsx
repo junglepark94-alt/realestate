@@ -37,7 +37,16 @@ function Dashboard() {
     fetchApartments()
       .then((data) => {
         setApartments(data);
-        if (data.length > 0) setSelectedApt(data[0].id);
+        if (data.length > 0) {
+          // 구 칩 목록과 동일한 정렬(양천구를 맨 앞)로 첫 번째 구를 구하고,
+          // 그 구에 속한 첫 아파트를 기본 선택해 항상 맨 첫 번째 필터가 활성화되도록 함
+          const sortedGus = [...new Set(data.map((a) => a.gu))].sort((a, b) =>
+            a === '양천구' ? -1 : b === '양천구' ? 1 : 0
+          );
+          const firstGu = sortedGus[0];
+          const firstApt = data.find((a) => a.gu === firstGu) || data[0];
+          setSelectedApt(firstApt.id);
+        }
       })
       .catch(() => setApartments([]))
       .finally(() => setLoading(false));
