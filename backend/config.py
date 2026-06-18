@@ -483,4 +483,22 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 116㎡, 129㎡",
         },
     },
+    "raemian-verahills": {
+        "name": "래미안베라힐즈",
+        "dong": "녹번동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "111575",
+        # RTMS 표기도 "래미안베라힐즈"로 동일·유니크 (북한산래미안 등과 구분됨)
+        "search_names": ["래미안베라힐즈"],
+        "search_dong": "녹번동",
+        "info": {
+            "address": "서울시 은평구 녹번동",
+            "totalHouseholdCount": 1305,
+            "highFloor": "",
+            "useApproveYmd": "2019.08",
+            "builder": "삼성물산(주)",
+            "areas": "59㎡, 84㎡, 114㎡",
+        },
+    },
 }
