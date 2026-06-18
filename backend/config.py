@@ -6,22 +6,6 @@ load_dotenv()
 PUBLIC_DATA_API_KEY = os.getenv("PUBLIC_DATA_API_KEY", "")
 
 APARTMENTS = {
-    "hongje-hanyang": {
-        "name": "홍제한양",
-        "dong": "홍제동",
-        "gu": "서대문구",
-        "lawd_cd": "11410",
-        "complex_no": "7961",
-        "search_names": ["홍제한양", "홍제 한양"],
-        "info": {
-            "address": "서울시 서대문구 홍제동",
-            "totalHouseholdCount": 998,
-            "highFloor": "15",
-            "useApproveYmd": "1993.05",
-            "builder": "(주)한양",
-            "areas": "76㎡, 95㎡, 131㎡",
-        },
-    },
     "hillstate-nokbun": {
         "name": "힐스테이트녹번",
         "dong": "녹번동",
@@ -135,41 +119,6 @@ APARTMENTS = {
             "useApproveYmd": "2006.03",
             "builder": "",
             "areas": "55㎡, 57㎡, 75㎡, 84㎡",
-        },
-    },
-    "haengdang-sindonga": {
-        "name": "행당신동아",
-        "dong": "행당동",
-        "gu": "성동구",
-        "lawd_cd": "11200",
-        "complex_no": "332",
-        "search_names": ["신동아"],
-        "search_dong": "행당동",
-        "search_build_year": "1995",
-        "info": {
-            "address": "서울시 성동구 행당동",
-            "totalHouseholdCount": 636,
-            "highFloor": "",
-            "useApproveYmd": "1995.05",
-            "builder": "신동아건설(주)",
-            "areas": "59㎡, 76㎡, 84㎡, 114㎡",
-        },
-    },
-    "yongdu-sindonga": {
-        "name": "용두신동아",
-        "dong": "용두동",
-        "gu": "동대문구",
-        "lawd_cd": "11230",
-        "complex_no": "338",
-        "search_names": ["신동아"],
-        "search_dong": "용두동",
-        "info": {
-            "address": "서울시 동대문구 용두동",
-            "totalHouseholdCount": 772,
-            "highFloor": "",
-            "useApproveYmd": "1994.10",
-            "builder": "신동아건설(주)",
-            "areas": "49㎡, 58㎡, 84㎡",
         },
     },
     "bukhansan-hillstate1": {
