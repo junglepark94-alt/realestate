@@ -501,4 +501,60 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 114㎡",
         },
     },
+    "daechi-seonkyung-3": {
+        "name": "대치선경3차",
+        "dong": "대치동",
+        "gu": "강남구",
+        "lawd_cd": "11680",
+        "complex_no": "9005",
+        # 대치동에 선경1·2·3차가 모두 있음. RTMS "선경3차"(1990)만 매칭
+        # ("선경1차(1동-7동)"·"선경2차(8동-12동)"와 구분)
+        "search_names": ["선경3차"],
+        "search_dong": "대치동",
+        "info": {
+            "address": "서울시 강남구 대치동",
+            "totalHouseholdCount": 54,
+            "highFloor": "",
+            "useApproveYmd": "1990.10",
+            "builder": "선경건설(주)",
+            "areas": "76㎡",
+        },
+    },
+    "tenzhill-2": {
+        "name": "텐즈힐2단지",
+        "dong": "상왕십리동",  # 1단지는 하왕십리동 → 동으로도 구분됨
+        "gu": "성동구",
+        "lawd_cd": "11200",
+        "complex_no": "104190",
+        # RTMS 표기 "텐즈힐(2단지)" (괄호 포함). 1단지와 구분
+        "search_names": ["텐즈힐(2단지)"],
+        "search_dong": "상왕십리동",
+        "info": {
+            "address": "서울시 성동구 상왕십리동",
+            "totalHouseholdCount": 1148,
+            "highFloor": "",
+            "useApproveYmd": "2014.06",
+            "builder": "GS건설·현대산업개발·삼성물산·대림산업",
+            "areas": "55㎡, 59㎡, 84㎡, 127㎡, 157㎡",
+        },
+    },
+    "gwanak-dreamtown": {
+        "name": "관악드림타운",
+        "dong": "봉천동",
+        "gu": "관악구",
+        "lawd_cd": "11620",
+        "complex_no": "2987",
+        # 네이버는 통합 단지(2987). RTMS는 "관악드림(동아)"·"관악드림(삼성)"
+        # 2개로 나뉘므로 공통 접두어 "관악드림"으로 전체 매칭
+        "search_names": ["관악드림"],
+        "search_dong": "봉천동",
+        "info": {
+            "address": "서울시 관악구 봉천동",
+            "totalHouseholdCount": 3544,
+            "highFloor": "",
+            "useApproveYmd": "2003.09",
+            "builder": "삼성물산·동아건설산업",
+            "areas": "59㎡, 84㎡, 102㎡, 114㎡",
+        },
+    },
 }
