@@ -426,4 +426,61 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡",
         },
     },
+    "mokdong-central-ipark-weve": {
+        "name": "목동센트럴아이파크위브",
+        "dong": "신월동",  # 신정뉴타운 생활권이나 법정동은 신월동
+        "gu": "양천구",
+        "lawd_cd": "11470",
+        "complex_no": "117329",
+        # 네이버는 1~4단지를 단일 단지(117329)로 등록. RTMS는 단지별로
+        # "목동센트럴아이파크위브1~4단지"로 나뉘므로 공통 접두어로 전체 매칭.
+        "search_names": ["목동센트럴아이파크위브"],
+        "search_dong": "신월동",
+        "info": {
+            "address": "서울시 양천구 신월동",
+            "totalHouseholdCount": 3045,
+            "highFloor": "",
+            "useApproveYmd": "2020.05",
+            "builder": "HDC현대산업개발·두산건설",
+            "areas": "52㎡, 59㎡, 84㎡",
+        },
+    },
+    "yeomchang-donga-3": {
+        "name": "염창동아3차",  # 네이버 표시명 (사용자 표기 '염창동동아3차'와 동일 단지)
+        "dong": "염창동",
+        "gu": "강서구",
+        "lawd_cd": "11500",
+        "complex_no": "870",
+        # RTMS 실거래 표기는 "동아3" (염창동 한정, "동아"·"한강동아"와 구분됨)
+        "search_names": ["동아3"],
+        "search_dong": "염창동",
+        "info": {
+            "address": "서울시 강서구 염창동",
+            "totalHouseholdCount": 570,
+            "highFloor": "",
+            "useApproveYmd": "1999.01",
+            "builder": "동아건설(주)",
+            "areas": "59㎡, 84㎡",
+        },
+    },
+    "sinjeong-newtown-lotte-castle": {
+        "name": "신정뉴타운롯데캐슬",
+        "dong": "신월동",  # 신정뉴타운이나 법정동은 신월동(1063)
+        "gu": "양천구",
+        "lawd_cd": "11470",
+        "complex_no": "107728",
+        # RTMS 표기는 단순 "롯데캐슬" → 신월동 내 동명 단지(2010·2008 등)와
+        # 준공연도(2014)로 구분
+        "search_names": ["롯데캐슬"],
+        "search_dong": "신월동",
+        "search_build_year": "2014",
+        "info": {
+            "address": "서울시 양천구 신월동",
+            "totalHouseholdCount": 968,
+            "highFloor": "",
+            "useApproveYmd": "2014.02",
+            "builder": "롯데건설(주)",
+            "areas": "59㎡, 84㎡, 116㎡, 129㎡",
+        },
+    },
 }
