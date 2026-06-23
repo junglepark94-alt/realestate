@@ -506,4 +506,22 @@ APARTMENTS = {
             "areas": "59㎡, 84㎡, 102㎡, 114㎡",
         },
     },
+    "dongnimmun-samho": {
+        "name": "독립문삼호",
+        "dong": "영천동",
+        "gu": "서대문구",
+        "lawd_cd": "11410",
+        "complex_no": "940",
+        # RTMS 표기도 "독립문삼호"로 동일·유니크 (북가좌삼호 등과 구분됨)
+        "search_names": ["독립문삼호"],
+        "search_dong": "영천동",
+        "info": {
+            "address": "서울시 서대문구 영천동",
+            "totalHouseholdCount": 895,
+            "highFloor": "18",
+            "useApproveYmd": "1995.06",
+            "builder": "(주)삼호",
+            "areas": "75㎡, 84㎡, 108㎡, 114㎡",
+        },
+    },
 }
