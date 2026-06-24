@@ -651,4 +651,41 @@ APARTMENTS = {
             "areas": "60㎡, 73㎡, 85㎡",
         },
     },
+    "eph-seodaemun": {
+        "name": "e편한세상서대문",
+        "dong": "홍은동",
+        "gu": "서대문구",
+        "lawd_cd": "11410",
+        "complex_no": "128515",
+        # RTMS 표기도 "e편한세상서대문"으로 동일·유니크
+        "search_names": ["e편한세상서대문"],
+        "search_dong": "홍은동",
+        "info": {
+            "address": "서울시 서대문구 홍은동",
+            "totalHouseholdCount": 481,
+            "highFloor": "",
+            "useApproveYmd": "2022.12",
+            "builder": "DL이앤씨(주)",
+            "areas": "60㎡, 85㎡",
+        },
+    },
+    "bukseoul-xi-polaris": {
+        "name": "북서울자이폴라리스",
+        "dong": "미아동",
+        "gu": "강북구",
+        "lawd_cd": "11305",
+        "complex_no": "146699",
+        # 네이버는 단일 단지(146699). RTMS는 "북서울자이폴라리스(1~3단지)"로
+        # 나뉘므로 공통 접두어로 전체 매칭
+        "search_names": ["북서울자이폴라리스"],
+        "search_dong": "미아동",
+        "info": {
+            "address": "서울시 강북구 미아동",
+            "totalHouseholdCount": 1045,
+            "highFloor": "",
+            "useApproveYmd": "2024.08",
+            "builder": "GS건설(주)",
+            "areas": "43㎡, 60㎡, 85㎡, 113㎡",
+        },
+    },
 }
