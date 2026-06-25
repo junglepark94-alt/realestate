@@ -6,6 +6,7 @@ import StatSummary from './StatSummary';
 import TransactionChart from './TransactionChart';
 import ListingTable from './ListingTable';
 import CompareView from './CompareView';
+import LoanSimulator from './LoanSimulator';
 
 // 최근 실거래가가 이 값(만원) 미만이면 '11억대 이하'로 보고 단지 칩을 강조
 const UNDER_BUDGET_MANWON = 120000; // 12억
@@ -139,6 +140,12 @@ function Dashboard() {
     return { transactions: filtered, summary };
   }, [txData, areaType]);
 
+  // 대출 시뮬레이션 기본 집값 = 선택 면적의 가장 최근 실거래가(만원)
+  const recentAreaPrice = useMemo(() => {
+    const txs = filteredTxData?.transactions;
+    return txs && txs.length > 0 ? txs[txs.length - 1].price : null;
+  }, [filteredTxData]);
+
   // Filter listings: exclude 월세, filter by area type
   const filteredListings = useMemo(() => {
     return listings.filter((l) => {
@@ -263,6 +270,8 @@ function Dashboard() {
             txLoading={txLoading}
             listingsLoading={listingsLoading}
           />
+
+          <LoanSimulator defaultPrice={recentAreaPrice} areaType={areaType} />
 
           <TransactionChart
             aptName={selected.name}

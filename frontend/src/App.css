@@ -1250,3 +1250,206 @@ tbody tr:last-child td {
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ===== Loan Simulator ===== */
+.loan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.loan-head h3 {
+  margin: 0;
+}
+.loan-mode {
+  display: inline-flex;
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+.loan-mode-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.loan-mode-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+.loan-rule {
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.loan-inputs {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 0.9fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.loan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.loan-field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.loan-field input,
+.loan-field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 10px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.loan-field input:focus,
+.loan-field select:focus {
+  border-color: var(--primary);
+}
+.loan-field small {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.loan-slider-row {
+  margin-bottom: 18px;
+}
+.loan-slider-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.loan-slider-label > span:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.loan-slider-label strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-h);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.loan-ltv {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.loan-max-btn {
+  margin-left: auto;
+  border: none;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.loan-max-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.loan-slider-row input[type='range'] {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.loan-slider-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.loan-results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.loan-result-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.loan-result-box.highlight {
+  background: var(--primary-light);
+}
+.loan-result-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+.loan-result-box.highlight .loan-result-label {
+  color: var(--primary-dark);
+}
+.loan-result-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-h);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.loan-result-box.highlight .loan-result-value {
+  color: var(--primary-dark);
+}
+.loan-result-sub {
+  font-size: 11px;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+.loan-note {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-light);
+}
+
+@media (max-width: 480px) {
+  .loan-inputs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .loan-inputs .loan-field:first-child {
+    grid-column: 1 / -1;
+  }
+  .loan-result-value {
+    font-size: 19px;
+  }
+  .loan-result-box {
+    padding: 14px;
+  }
+}
