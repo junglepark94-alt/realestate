@@ -1,11 +1,12 @@
 import os
+import hmac
 import logging
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from config import APARTMENTS
 from services.public_data import get_transactions, get_monthly_summary
-from services.naver_land import get_complex_info, get_listings_with_meta, get_price_trend, save_listings_cache
+from services.naver_land import get_complex_info, get_listings_with_meta, save_listings_cache
 import cache
 
 logging.basicConfig(
@@ -13,10 +14,19 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 
+# Upper bound for the user-supplied `months` query param so a crafted request
+# (e.g. ?months=1000000) can't fan out into a huge range / external-API storm.
+MAX_MONTHS = 36
+
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="")
-CORS(app)
+# Same-origin in prod (Flask serves the built frontend) and in dev (Vite proxies
+# /api), so CORS is only needed for explicit cross-origin use. Restrict via
+# ALLOWED_ORIGINS (comma-separated) in production; defaults to "*".
+_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*").strip()
+_origins = "*" if _allowed_origins in ("", "*") else [o.strip() for o in _allowed_origins.split(",")]
+CORS(app, resources={r"/api/*": {"origins": _origins}})
 
 
 def _recent_deal_price(apt_id):
@@ -63,6 +73,7 @@ def transactions(apt_id):
         return jsonify({"error": "아파트를 찾을 수 없습니다"}), 404
 
     months = request.args.get("months", 12, type=int)
+    months = max(1, min(months or 12, MAX_MONTHS))
     try:
         data = get_transactions(apt, months, apt_id=apt_id)
         summary = get_monthly_summary(transactions=data)
@@ -84,20 +95,6 @@ def listings(apt_id):
     return jsonify(data)
 
 
-@app.route("/api/price-trend/<apt_id>")
-def price_trend(apt_id):
-    if apt_id not in APARTMENTS:
-        return jsonify({"error": "아파트를 찾을 수 없습니다"}), 404
-
-    years = request.args.get("years", 5, type=int)
-    try:
-        data = get_price_trend(apt_id, years)
-    except Exception as e:
-        logging.error(f"get_price_trend({apt_id}) failed: {e}")
-        data = None
-    return jsonify({"priceTrend": data})
-
-
 SYNC_KEY = os.environ.get("SYNC_KEY", "")
 
 
@@ -105,7 +102,7 @@ SYNC_KEY = os.environ.get("SYNC_KEY", "")
 def sync_listings():
     """Receive listing data pushed from a local scraper (Korean IP)."""
     key = request.headers.get("X-Sync-Key", "")
-    if not SYNC_KEY or key != SYNC_KEY:
+    if not SYNC_KEY or not hmac.compare_digest(key, SYNC_KEY):
         return jsonify({"error": "unauthorized"}), 401
 
     data = request.get_json(silent=True)
@@ -130,9 +127,14 @@ def serve_frontend(path):
     return send_from_directory(STATIC_DIR, "index.html")
 
 
-# Start background scheduler (startup refresh + daily 06:00 KST)
-from scheduler import start_scheduler
-start_scheduler()
+# Start background scheduler (startup refresh + daily 06:00 KST).
+# Runs at import, i.e. once per gunicorn worker — fine with the default
+# --workers 1. If you scale to multiple workers, set RUN_SCHEDULER=0 on all but
+# one (refresh_all also takes a cross-process lock as a safety net). See
+# scheduler.py.
+if os.environ.get("RUN_SCHEDULER", "1") not in ("0", "false", "False"):
+    from scheduler import start_scheduler
+    start_scheduler()
 
 
 if __name__ == "__main__":

@@ -78,3 +78,32 @@ def write_json(key: str, data: dict) -> None:
 
     path = CACHE_DIR / f"{key}.json"
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def acquire_lock(name: str, ttl_seconds: int = 3600) -> bool:
+    """Best-effort distributed lock (Redis SET NX EX).
+
+    Returns True if the lock was acquired. With Redis this is cross-process, so
+    only one gunicorn worker runs a guarded section (e.g. the daily refresh).
+    Without Redis (local file cache) there is nothing to coordinate across
+    processes, so it always returns True and the caller's in-process lock applies.
+    The TTL auto-releases the lock if the holder dies mid-task.
+    """
+    r = _get_redis()
+    if r is None:
+        return True
+    try:
+        return bool(r.set(_KEY_PREFIX + "lock:" + name, "1", nx=True, ex=ttl_seconds))
+    except Exception as e:
+        logger.warning(f"[cache] acquire_lock({name}) failed: {e} — proceeding without lock")
+        return True
+
+
+def release_lock(name: str) -> None:
+    r = _get_redis()
+    if r is None:
+        return
+    try:
+        r.delete(_KEY_PREFIX + "lock:" + name)
+    except Exception as e:
+        logger.warning(f"[cache] release_lock({name}) failed: {e}")

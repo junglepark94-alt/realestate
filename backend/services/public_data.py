@@ -1,3 +1,4 @@
+import os
 import logging
 import requests
 import urllib3
@@ -8,7 +9,11 @@ from dateutil.relativedelta import relativedelta
 from config import PUBLIC_DATA_API_KEY
 import cache
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# TLS verification is ON by default (data.go.kr has a valid cert). Set
+# PUBLIC_DATA_VERIFY_SSL=0 only for local dev behind a self-signed proxy.
+_VERIFY_SSL = os.environ.get("PUBLIC_DATA_VERIFY_SSL", "1") not in ("0", "false", "False")
+if not _VERIFY_SSL:
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade"
@@ -21,7 +26,7 @@ def _fetch_month(lawd_cd: str, deal_ymd: str) -> list[dict]:
         f"{BASE_URL}?serviceKey={PUBLIC_DATA_API_KEY}"
         f"&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ymd}&pageNo=1&numOfRows=1000"
     )
-    resp = requests.get(url, timeout=10, verify=False)
+    resp = requests.get(url, timeout=10, verify=_VERIFY_SSL)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.content, "xml")
 
@@ -61,8 +66,16 @@ def get_transactions(apt_config: dict, months: int = 12, force_refresh: bool = F
 
     ymds = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
 
+    def _safe_fetch(ymd):
+        # Isolate per-month failures so one bad month doesn't void the whole range.
+        try:
+            return _fetch_month(lawd_cd, ymd)
+        except Exception as e:
+            logger.warning(f"[transactions] {lawd_cd} {ymd} fetch failed: {e}")
+            return []
+
     with ThreadPoolExecutor(max_workers=6) as pool:
-        results = list(pool.map(lambda ymd: _fetch_month(lawd_cd, ymd), ymds))
+        results = list(pool.map(_safe_fetch, ymds))
 
     all_items = []
     for items in results:

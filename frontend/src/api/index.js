@@ -9,6 +9,3 @@ export const fetchTransactions = (aptId, months = 12) =>
 
 export const fetchListings = (aptId) =>
   api.get(`/listings/${aptId}`, { timeout: 30000 }).then(r => r.data);
-
-export const fetchPriceTrend = (aptId, years = 5) =>
-  api.get(`/price-trend/${aptId}`, { params: { years } }).then(r => r.data);

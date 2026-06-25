@@ -261,11 +261,3 @@ def get_listings_with_meta(apt_id: str) -> dict:
     if cache and "listings" in cache:
         return {"listings": cache["listings"], "updatedAt": cache.get("_cached_at")}
     return {"listings": [], "updatedAt": None}
-
-
-def get_price_trend(apt_id: str, years: int = 5) -> dict | None:
-    cache = _read_cache(f"trend_{apt_id}")
-    if cache:
-        cache.pop("_cached_at", None)
-        return cache
-    return None

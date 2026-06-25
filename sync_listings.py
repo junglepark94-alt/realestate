@@ -22,10 +22,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 RAILWAY_URL = os.environ.get("RAILWAY_URL", "").rstrip("/")
 SYNC_KEY = os.environ.get("SYNC_KEY", "")
 
+# Single source of truth: pull the apartment list from backend/config.py so this
+# fallback scraper never drifts from the server's registered complexes.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend"))
+from config import APARTMENTS as _APARTMENTS  # noqa: E402
+
 APARTMENTS = {
-    "hongje-hanyang": {"name": "홍제한양", "complex_no": "7961"},
-    "hillstate-nokbun": {"name": "힐스테이트녹번", "complex_no": "111964"},
-    "hongjewon-hyundai": {"name": "홍제원현대", "complex_no": "26841"},
+    apt_id: {"name": apt["name"], "complex_no": apt["complex_no"]}
+    for apt_id, apt in _APARTMENTS.items()
 }
 
 LAND_NEW = "https://fin.land.naver.com"
