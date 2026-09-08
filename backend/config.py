@@ -688,4 +688,42 @@ APARTMENTS = {
             "areas": "43㎡, 60㎡, 85㎡, 113㎡",
         },
     },
+    "dmc-woobang": {
+        "name": "DMC우방",
+        "dong": "증산동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "1234",
+        # RTMS 표기도 "DMC우방"으로 동일·유니크 (증산동 한정)
+        "search_names": ["DMC우방"],
+        "search_dong": "증산동",
+        "info": {
+            "address": "서울시 은평구 증산동",
+            "totalHouseholdCount": 429,
+            "highFloor": "23",
+            "useApproveYmd": "2000.03",
+            "builder": "(주)우방",
+            "areas": "60㎡, 85㎡, 115㎡",
+        },
+    },
+    "dmc-cheonggu": {
+        "name": "DMC청구",
+        "dong": "수색동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "8694",
+        # 네이버 검색은 "DMC청구"로 단지를 못 찾음 → 구 명칭으로 검색
+        "naver_query": "수색청구",
+        # RTMS 표기는 접두어 없는 "청구" → 수색동으로 한정해 구분
+        "search_names": ["청구"],
+        "search_dong": "수색동",
+        "info": {
+            "address": "서울시 은평구 수색동",
+            "totalHouseholdCount": 196,
+            "highFloor": "18",
+            "useApproveYmd": "2000.03",
+            "builder": "(주)청구주택",
+            "areas": "60㎡, 85㎡",
+        },
+    },
 }
