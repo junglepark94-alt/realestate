@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { fetchApartments, fetchTransactions, fetchListings } from '../api';
+import useDragScroll from '../hooks/useDragScroll';
 import { getAreaType, extractAreaTypes, areaLabel } from '../utils/areaType';
 import ApartmentCard from './ApartmentCard';
 import StatSummary from './StatSummary';
@@ -52,6 +53,9 @@ function Dashboard() {
       .catch(() => setApartments([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const guChipsRef = useDragScroll();
+  const aptChipsRef = useDragScroll();
 
   const selected = apartments.find((a) => a.id === selectedApt);
   const hiddenTypes = selected?.hiddenAreaTypes || [];
@@ -206,7 +210,7 @@ function Dashboard() {
 
       {/* Two-row tab bar: gu chip row + apartment chip row (all screen sizes) */}
       <div className="tab-bar">
-        <div className="gu-chips">
+        <div className="gu-chips" ref={guChipsRef}>
           {gus.map((gu) => (
             <button
               key={gu}
@@ -217,7 +221,7 @@ function Dashboard() {
             </button>
           ))}
         </div>
-        <div className="apt-chips">
+        <div className="apt-chips" ref={aptChipsRef}>
           {apartments
             .filter((apt) => apt.gu === activeGu)
             .map((apt) => {
