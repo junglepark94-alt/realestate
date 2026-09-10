@@ -1270,6 +1270,28 @@ tbody tr:last-child td {
 .loan-head h3 {
   margin: 0;
 }
+.loan-sim.collapsed .loan-head {
+  margin-bottom: 0;
+}
+.loan-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.loan-chevron {
+  font-size: 14px;
+  color: var(--text-light);
+  transition: transform 0.2s ease;
+}
+.loan-sim.open .loan-chevron {
+  transform: rotate(180deg);
+}
 .loan-mode {
   display: inline-flex;
   background: var(--bg);

@@ -22,6 +22,8 @@ function LoanSimulator({ defaultPrice, areaType }) {
   const [rate, setRate] = useState(String(DEFAULT_RATE));
   const [years, setYears] = useState(30);
   const [loan, setLoan] = useState(0);
+  // 평상시 접힌 상태, 헤더 클릭으로 펼침 (단지 변경에도 유지)
+  const [open, setOpen] = useState(false);
 
   const price = Math.max(0, Number(priceInput) || 0);
 
@@ -46,9 +48,18 @@ function LoanSimulator({ defaultPrice, areaType }) {
   );
 
   return (
-    <div className="card loan-sim">
+    <div className={`card loan-sim ${open ? 'open' : 'collapsed'}`}>
       <div className="loan-head">
-        <h3>대출 시뮬레이션</h3>
+        <button
+          type="button"
+          className="loan-toggle"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+        >
+          <h3>대출 시뮬레이션</h3>
+          <span className="loan-chevron" aria-hidden="true">▾</span>
+        </button>
+        {open && (
         <div className="loan-mode">
           <button
             className={`loan-mode-btn ${!firstHome ? 'active' : ''}`}
@@ -63,8 +74,11 @@ function LoanSimulator({ defaultPrice, areaType }) {
             생애최초
           </button>
         </div>
+        )}
       </div>
 
+      {open && (
+      <>
       <p className="loan-rule">
         {firstHome
           ? '생애최초 · LTV 80% (한도 6억)'
@@ -164,6 +178,8 @@ function LoanSimulator({ defaultPrice, areaType }) {
             실제 한도·금리는 은행·개인 조건에 따라 다릅니다
           </p>
         </>
+      )}
+      </>
       )}
     </div>
   );
