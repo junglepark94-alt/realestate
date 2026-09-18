@@ -15,6 +15,8 @@ function formatSinglePrice(s) {
   return `${(num / 10000).toFixed(1)}억`;
 }
 
+const INITIAL_VISIBLE = 10;
+
 const TRADE_TABS = [
   { key: '매매', label: '매매' },
   { key: '전세', label: '전세' },
@@ -33,11 +35,16 @@ function formatUpdatedAt(iso) {
 function ListingTable({ aptName, listings, loading, error, updatedAt }) {
   const [tradeFilter, setTradeFilter] = useState('매매');
   const [popupText, setPopupText] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     if (tradeFilter === 'all') return listings;
     return listings.filter((l) => l.tradeType === tradeFilter);
   }, [listings, tradeFilter]);
+
+  const hasMore = filtered.length > INITIAL_VISIBLE;
+  const visible = hasMore && !expanded ? filtered.slice(0, INITIAL_VISIBLE) : filtered;
+  const hiddenCount = filtered.length - INITIAL_VISIBLE;
 
   const counts = useMemo(() => {
     const m = { all: listings.length, '매매': 0, '전세': 0 };
@@ -77,7 +84,7 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
             <button
               key={t.key}
               className={`trade-tab ${tradeFilter === t.key ? 'active' : ''}`}
-              onClick={() => setTradeFilter(t.key)}
+              onClick={() => { setTradeFilter(t.key); setExpanded(false); }}
             >
               {t.label}
               <span className="trade-count">{counts[t.key]}</span>
@@ -90,7 +97,7 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
         <p className="empty-text">해당 조건의 매물이 없습니다</p>
       ) : (
         <div className="listing-list">
-          {filtered.map((l) => (
+          {visible.map((l) => (
             <div
               key={l.articleNo}
               className="listing-row"
@@ -123,6 +130,16 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
               </div>
             </div>
           ))}
+          {hasMore && (
+            <button
+              type="button"
+              className={`listing-more ${expanded ? 'open' : ''}`}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? '접기' : `더보기 (${hiddenCount}개 더)`}
+              <span className="listing-more-chevron">▾</span>
+            </button>
+          )}
         </div>
       )}
 

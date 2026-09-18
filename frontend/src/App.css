@@ -963,6 +963,39 @@ tbody tr:last-child td {
   transform: scale(0.94);
 }
 
+/* ===== Listing "더보기" ===== */
+.listing-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 0;
+  border: 1px dashed var(--border-light);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.listing-more:hover {
+  background: var(--primary-light);
+}
+.listing-more:active {
+  transform: scale(0.98);
+}
+.listing-more-chevron {
+  display: inline-block;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+.listing-more.open .listing-more-chevron {
+  transform: rotate(180deg);
+}
+
 /* ===== Popup Overlay ===== */
 .popup-overlay {
   position: fixed;
