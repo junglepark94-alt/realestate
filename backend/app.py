@@ -1,6 +1,7 @@
 import os
 import hmac
 import logging
+import threading
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -116,6 +117,38 @@ def sync_listings():
     save_listings_cache(apt_id, data["listings"])
     logging.info(f"[sync] Received {len(data['listings'])} listings for {apt_id}")
     return jsonify({"ok": True, "count": len(data["listings"])})
+
+
+# 가족 공용 즐겨찾기: 로그인 없이 모두가 하나의 목록을 공유한다.
+# 동시 편집 시 서로의 변경을 덮어쓰지 않도록 목록 통째가 아닌 단지 단위로 추가/삭제.
+_FAVORITES_KEY = "favorites"
+_favorites_lock = threading.Lock()
+
+
+def _read_favorites():
+    c = cache.read_json(_FAVORITES_KEY)
+    ids = c.get("ids", []) if c else []
+    return [i for i in ids if i in APARTMENTS]  # 목록에서 빠진 단지는 제외
+
+
+@app.route("/api/favorites")
+def favorites():
+    return jsonify({"favorites": _read_favorites()})
+
+
+@app.route("/api/favorites/<apt_id>", methods=["PUT", "DELETE"])
+def update_favorite(apt_id):
+    if apt_id not in APARTMENTS:
+        return jsonify({"error": "unknown apartment"}), 404
+    with _favorites_lock:
+        ids = _read_favorites()
+        if request.method == "PUT":
+            if apt_id not in ids:
+                ids.append(apt_id)
+        else:
+            ids = [i for i in ids if i != apt_id]
+        cache.write_json(_FAVORITES_KEY, {"ids": ids})
+    return jsonify({"favorites": ids})
 
 
 @app.route("/", defaults={"path": ""})
