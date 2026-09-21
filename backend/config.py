@@ -726,4 +726,22 @@ APARTMENTS = {
             "areas": "60㎡, 85㎡",
         },
     },
+    "eph-susaek-ecoforet": {
+        "name": "e편한세상수색에코포레",
+        "dong": "수색동",
+        "gu": "은평구",
+        "lawd_cd": "11380",
+        "complex_no": "3462",
+        # RTMS 표기는 띄어쓰기 포함 "e편한세상 수색 에코포레" (구 대림한숲타운, 과거 거래도 신명칭)
+        "search_names": ["수색 에코포레", "수색에코포레"],
+        "search_dong": "수색동",
+        "info": {
+            "address": "서울시 은평구 수색동",
+            "totalHouseholdCount": 976,
+            "highFloor": "15",
+            "useApproveYmd": "2003.07",
+            "builder": "대림산업(주)",
+            "areas": "60㎡, 85㎡, 115㎡",
+        },
+    },
 }

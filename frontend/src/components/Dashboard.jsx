@@ -12,6 +12,13 @@ import LoanSimulator from './LoanSimulator';
 // 최근 실거래가가 이 값(만원) 미만이면 '11억대 이하'로 보고 단지 칩을 강조
 const UNDER_BUDGET_MANWON = 120000; // 12억
 
+// 구 칩 고정 순서 (나머지는 데이터 순서 유지)
+const GU_PRIORITY = ['은평구', '양천구'];
+const guRank = (gu) => {
+  const i = GU_PRIORITY.indexOf(gu);
+  return i === -1 ? GU_PRIORITY.length : i;
+};
+
 function Dashboard() {
   const [apartments, setApartments] = useState([]);
   const [selectedApt, setSelectedApt] = useState(null);
@@ -40,10 +47,10 @@ function Dashboard() {
       .then((data) => {
         setApartments(data);
         if (data.length > 0) {
-          // 구 칩 목록과 동일한 정렬(양천구를 맨 앞)로 첫 번째 구를 구하고,
+          // 구 칩 목록과 동일한 정렬(은평구 → 양천구 순으로 맨 앞)로 첫 번째 구를 구하고,
           // 그 구에 속한 첫 아파트를 기본 선택해 항상 맨 첫 번째 필터가 활성화되도록 함
-          const sortedGus = [...new Set(data.map((a) => a.gu))].sort((a, b) =>
-            a === '양천구' ? -1 : b === '양천구' ? 1 : 0
+          const sortedGus = [...new Set(data.map((a) => a.gu))].sort(
+            (a, b) => guRank(a) - guRank(b)
           );
           const firstGu = sortedGus[0];
           const firstApt = data.find((a) => a.gu === firstGu) || data[0];
@@ -61,8 +68,8 @@ function Dashboard() {
   const hiddenTypes = selected?.hiddenAreaTypes || [];
   const gus = useMemo(() => {
     const unique = [...new Set(apartments.map((a) => a.gu))];
-    // 양천구를 맨 좌측으로
-    return unique.sort((a, b) => (a === '양천구' ? -1 : b === '양천구' ? 1 : 0));
+    // 은평구 → 양천구 순으로 맨 좌측에
+    return unique.sort((a, b) => guRank(a) - guRank(b));
   }, [apartments]);
   const activeGu = guFilter || selected?.gu;
 
