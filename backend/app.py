@@ -96,6 +96,22 @@ def listings(apt_id):
     return jsonify(data)
 
 
+@app.route("/api/refresh/<apt_id>", methods=["GET", "POST"])
+def refresh(apt_id):
+    """새로고침 버튼: POST로 해당 단지 재수집 시작, GET으로 진행 상태 조회."""
+    if apt_id not in APARTMENTS:
+        return jsonify({"error": "아파트를 찾을 수 없습니다"}), 404
+    import scheduler
+
+    result = None
+    if request.method == "POST":
+        result = scheduler.start_manual_refresh(apt_id)
+    status = scheduler.manual_refresh_status(apt_id)
+    status["result"] = result
+    code = 429 if result in ("busy", "cooldown") else 200
+    return jsonify(status), code
+
+
 SYNC_KEY = os.environ.get("SYNC_KEY", "")
 
 

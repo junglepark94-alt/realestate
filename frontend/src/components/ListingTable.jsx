@@ -32,7 +32,10 @@ function formatUpdatedAt(iso) {
   return `${d.getMonth() + 1}.${d.getDate()} ${hh}:${mi} 업데이트`;
 }
 
-function ListingTable({ aptName, listings, loading, error, updatedAt }) {
+function ListingTable({
+  aptName, listings, loading, error, updatedAt,
+  onRefresh, refreshing, refreshDisabled, refreshNote,
+}) {
   const [tradeFilter, setTradeFilter] = useState('매매');
   const [popupText, setPopupText] = useState(null);
   const [expanded, setExpanded] = useState(false);
@@ -78,6 +81,19 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
         <h3>
           매매/전세 매물
           {updatedAt && <span className="h3-sub">{formatUpdatedAt(updatedAt)}</span>}
+          {onRefresh && (
+            <button
+              type="button"
+              className={`refresh-btn ${refreshing ? 'spinning' : ''}`}
+              onClick={onRefresh}
+              disabled={refreshDisabled}
+              aria-label="매물·실거래가 새로고침"
+              title="이 단지의 매물·실거래가를 지금 다시 수집"
+            >
+              <span className="refresh-icon">↻</span>
+              {refreshing ? '수집 중…' : '새로고침'}
+            </button>
+          )}
         </h3>
         <div className="trade-filter">
           {TRADE_TABS.map((t) => (
@@ -92,6 +108,8 @@ function ListingTable({ aptName, listings, loading, error, updatedAt }) {
           ))}
         </div>
       </div>
+
+      {refreshNote && <p className="refresh-note">{refreshNote}</p>}
 
       {filtered.length === 0 ? (
         <p className="empty-text">해당 조건의 매물이 없습니다</p>

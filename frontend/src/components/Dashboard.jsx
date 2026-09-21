@@ -1,5 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
-import { fetchApartments, fetchTransactions, fetchListings } from '../api';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import {
+  fetchApartments, fetchTransactions, fetchListings, startRefresh, fetchRefreshStatus,
+} from '../api';
 import useDragScroll from '../hooks/useDragScroll';
 import useFavorites from '../hooks/useFavorites';
 import { getAreaType, extractAreaTypes, areaLabel } from '../utils/areaType';
@@ -17,6 +19,10 @@ const UNDER_BUDGET_MANWON = 120000; // 12억
 const GU_PRIORITY = ['은평구', '양천구'];
 // 구 칩 행 맨 왼쪽의 즐겨찾기 필터 (구 이름과 겹치지 않는 값)
 const FAV_FILTER = '__fav__';
+
+// 새로고침 진행 상태 확인 주기 / 최대 대기 (전체 새로고침 뒤에 줄 서면 오래 걸릴 수 있음)
+const REFRESH_POLL_MS = 3000;
+const REFRESH_MAX_WAIT_MS = 5 * 60 * 1000;
 
 const guRank = (gu) => {
   const i = GU_PRIORITY.indexOf(gu);
@@ -124,6 +130,60 @@ function Dashboard() {
       .catch(() => { setListings([]); setListingsError(true); })
       .finally(() => setListingsLoading(false));
   }, [selectedApt]);
+
+  // 새로고침 버튼: 선택한 단지만 서버에서 재수집 → 끝나면 화면 데이터만 조용히 교체
+  const [refreshingApt, setRefreshingApt] = useState(null);
+  const [refreshNote, setRefreshNote] = useState(null); // { aptId, text }
+  const selectedAptRef = useRef(selectedApt);
+  useEffect(() => {
+    selectedAptRef.current = selectedApt;
+  }, [selectedApt]);
+
+  const handleRefresh = useCallback(async () => {
+    const aptId = selectedAptRef.current;
+    if (!aptId || refreshingApt) return;
+    const note = (text) => setRefreshNote({ aptId, text });
+    setRefreshNote(null);
+    setRefreshingApt(aptId);
+    try {
+      const res = await startRefresh(aptId);
+      if (res.result === 'cooldown') {
+        note(`방금 새로고침했어요. ${Math.ceil(res.retryAfter / 60)}분 뒤에 다시 시도해 주세요`);
+        return;
+      }
+      if (res.result === 'busy') {
+        note('다른 단지를 새로고침하는 중이에요. 잠시 뒤 다시 시도해 주세요');
+        return;
+      }
+      const deadline = Date.now() + REFRESH_MAX_WAIT_MS;
+      let status = res;
+      while (status.running && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, REFRESH_POLL_MS));
+        status = await fetchRefreshStatus(aptId);
+      }
+      if (status.running) {
+        note('수집이 오래 걸리고 있어요. 잠시 뒤 페이지를 다시 열어 주세요');
+        return;
+      }
+      if (selectedAptRef.current === aptId) {
+        const [l, tx] = await Promise.all([
+          fetchListings(aptId),
+          fetchTransactions(aptId, 24).catch(() => null),
+        ]);
+        if (selectedAptRef.current === aptId) {
+          setListings(l.listings || []);
+          setListingsUpdatedAt(l.updatedAt || null);
+          setListingsError(false);
+          if (tx) setTxData(tx);
+        }
+      }
+      if (!status.last?.ok) note('네이버에서 매물을 가져오지 못했어요 (기존 데이터 유지)');
+    } catch {
+      note('새로고침에 실패했어요');
+    } finally {
+      setRefreshingApt(null);
+    }
+  }, [refreshingApt]);
 
   // Extract available area types, excluding hidden ones
   const availableTypes = useMemo(() => {
@@ -324,6 +384,10 @@ function Dashboard() {
             loading={listingsLoading}
             error={listingsError}
             updatedAt={listingsUpdatedAt}
+            onRefresh={handleRefresh}
+            refreshing={refreshingApt === selectedApt}
+            refreshDisabled={refreshingApt !== null}
+            refreshNote={refreshNote?.aptId === selectedApt ? refreshNote.text : null}
           />
         </div>
       )}
