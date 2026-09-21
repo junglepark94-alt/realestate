@@ -48,17 +48,22 @@ function Dashboard() {
   // Mobile gu browser (which gu's apartments are shown in the mobile tab row)
   const [guFilter, setGuFilter] = useState(null);
 
-  const { favorites, toggleFavorite } = useFavorites();
-
   // Compare mode
   const [compareMode, setCompareMode] = useState(false);
 
+  const { favorites, toggleFavorite, favoritesReady } = useFavorites();
+
   // Load apartment list
   useEffect(() => {
-    fetchApartments()
-      .then((data) => {
+    Promise.all([fetchApartments(), favoritesReady])
+      .then(([data, favIds]) => {
         setApartments(data);
-        if (data.length > 0) {
+        // 즐겨찾기가 있으면 즐겨찾기 탭 + 첫 즐겨찾기 단지로 시작
+        const firstFav = favIds.map((id) => data.find((a) => a.id === id)).find(Boolean);
+        if (firstFav) {
+          setGuFilter(FAV_FILTER);
+          setSelectedApt(firstFav.id);
+        } else if (data.length > 0) {
           // 구 칩 목록과 동일한 정렬(은평구 → 양천구 순으로 맨 앞)로 첫 번째 구를 구하고,
           // 그 구에 속한 첫 아파트를 기본 선택해 항상 맨 첫 번째 필터가 활성화되도록 함
           const sortedGus = [...new Set(data.map((a) => a.gu))].sort(
@@ -71,7 +76,7 @@ function Dashboard() {
       })
       .catch(() => setApartments([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [favoritesReady]);
 
   const guChipsRef = useDragScroll();
   const aptChipsRef = useDragScroll();

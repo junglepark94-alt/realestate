@@ -28,6 +28,12 @@ export default function useFavorites() {
   const [favorites, setFavorites] = useState(loadLocal);
   // 늦게 도착한 이전 응답이 최신 상태를 덮어쓰지 않도록 요청 순번을 기록
   const seq = useRef(0);
+  // 첫 서버 조회 결과(실패 시 로컬 캐시)로 resolve — 첫 화면의 기본 탭을 정할 때 사용
+  const [ready] = useState(() => {
+    let resolve;
+    const promise = new Promise((r) => { resolve = r; });
+    return { promise, resolve };
+  });
 
   const apply = useCallback((ids) => {
     setFavorites(ids);
@@ -54,6 +60,7 @@ export default function useFavorites() {
     }
 
     refresh().then(async (serverIds) => {
+      ready.resolve(serverIds || local);
       if (!serverIds || migrated) return;
       for (const id of local.filter((f) => !serverIds.includes(f))) {
         try {
@@ -75,7 +82,7 @@ export default function useFavorites() {
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
-  }, [refresh, apply]);
+  }, [refresh, apply, ready]);
 
   const toggleFavorite = useCallback(
     (id) => {
@@ -95,5 +102,5 @@ export default function useFavorites() {
     [favorites, apply, refresh]
   );
 
-  return { favorites, toggleFavorite };
+  return { favorites, toggleFavorite, favoritesReady: ready.promise };
 }
