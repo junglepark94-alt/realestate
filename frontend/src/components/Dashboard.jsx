@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { fetchApartments, fetchTransactions, fetchListings } from '../api';
 import useDragScroll from '../hooks/useDragScroll';
+import useFavorites from '../hooks/useFavorites';
 import { getAreaType, extractAreaTypes, areaLabel } from '../utils/areaType';
 import ApartmentCard from './ApartmentCard';
 import StatSummary from './StatSummary';
@@ -14,6 +15,9 @@ const UNDER_BUDGET_MANWON = 120000; // 12억
 
 // 구 칩 고정 순서 (나머지는 데이터 순서 유지)
 const GU_PRIORITY = ['은평구', '양천구'];
+// 구 칩 행 맨 왼쪽의 즐겨찾기 필터 (구 이름과 겹치지 않는 값)
+const FAV_FILTER = '__fav__';
+
 const guRank = (gu) => {
   const i = GU_PRIORITY.indexOf(gu);
   return i === -1 ? GU_PRIORITY.length : i;
@@ -37,6 +41,8 @@ function Dashboard() {
 
   // Mobile gu browser (which gu's apartments are shown in the mobile tab row)
   const [guFilter, setGuFilter] = useState(null);
+
+  const { favorites, toggleFavorite } = useFavorites();
 
   // Compare mode
   const [compareMode, setCompareMode] = useState(false);
@@ -65,13 +71,23 @@ function Dashboard() {
   const aptChipsRef = useDragScroll();
 
   const selected = apartments.find((a) => a.id === selectedApt);
-  const hiddenTypes = selected?.hiddenAreaTypes || [];
   const gus = useMemo(() => {
     const unique = [...new Set(apartments.map((a) => a.gu))];
     // 은평구 → 양천구 순으로 맨 좌측에
     return unique.sort((a, b) => guRank(a) - guRank(b));
   }, [apartments]);
-  const activeGu = guFilter || selected?.gu;
+  // 목록에서 사라진 단지 id는 제외, 즐겨찾기한 순서 유지
+  const favoriteApts = useMemo(
+    () => favorites.map((id) => apartments.find((a) => a.id === id)).filter(Boolean),
+    [favorites, apartments]
+  );
+  // 즐겨찾기가 모두 해제되면 즐겨찾기 필터에서 선택 단지의 구로 복귀
+  const activeGu =
+    guFilter === FAV_FILTER && favoriteApts.length === 0
+      ? selected?.gu
+      : guFilter || selected?.gu;
+  const visibleApts =
+    activeGu === FAV_FILTER ? favoriteApts : apartments.filter((apt) => apt.gu === activeGu);
 
   // Auto-scroll active tab / gu chip into view (horizontal scroll lists)
   useEffect(() => {
@@ -114,10 +130,11 @@ function Dashboard() {
     const txTypes = txData?.transactions ? extractAreaTypes(txData.transactions) : [];
     const listingTypes = extractAreaTypes(listings);
     const merged = new Set([...txTypes, ...listingTypes]);
+    const hiddenTypes = selected?.hiddenAreaTypes || [];
     return [...merged]
       .filter((t) => !hiddenTypes.includes(t))
       .sort((a, b) => Number(a) - Number(b));
-  }, [txData, listings, hiddenTypes]);
+  }, [txData, listings, selected]);
 
   // Auto-select first available type when apartment changes or types update
   useEffect(() => {
@@ -218,6 +235,14 @@ function Dashboard() {
       {/* Two-row tab bar: gu chip row + apartment chip row (all screen sizes) */}
       <div className="tab-bar">
         <div className="gu-chips" ref={guChipsRef}>
+          {favoriteApts.length > 0 && (
+            <button
+              className={`gu-chip fav-chip ${activeGu === FAV_FILTER ? 'active' : ''}`}
+              onClick={() => setGuFilter(FAV_FILTER)}
+            >
+              ★ 즐겨찾기 {favoriteApts.length}
+            </button>
+          )}
           {gus.map((gu) => (
             <button
               key={gu}
@@ -229,9 +254,7 @@ function Dashboard() {
           ))}
         </div>
         <div className="apt-chips" ref={aptChipsRef}>
-          {apartments
-            .filter((apt) => apt.gu === activeGu)
-            .map((apt) => {
+          {visibleApts.map((apt) => {
               // 최근 실거래가 11억대 이하(12억 미만) 단지 강조
               const underBudget =
                 apt.recentPrice != null && apt.recentPrice < UNDER_BUDGET_MANWON;
@@ -242,6 +265,9 @@ function Dashboard() {
                   onClick={() => setSelectedApt(apt.id)}
                 >
                   {underBudget && <i className="budget-dot" />}
+                  {activeGu !== FAV_FILTER && favorites.includes(apt.id) && (
+                    <span className="tab-star">★</span>
+                  )}
                   {apt.name}
                 </button>
               );
@@ -256,6 +282,8 @@ function Dashboard() {
             dealCount={listingCounts.dealCount}
             leaseCount={listingCounts.leaseCount}
             listingsLoading={listingsLoading}
+            isFavorite={favorites.includes(selected.id)}
+            onToggleFavorite={() => toggleFavorite(selected.id)}
           />
 
           {/* Area type filter */}

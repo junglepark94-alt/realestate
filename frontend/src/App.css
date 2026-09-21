@@ -496,6 +496,36 @@
   min-width: 0;
 }
 
+/* 즐겨찾기 */
+.fav-toggle {
+  align-self: center;
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--border);
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.fav-toggle:hover {
+  color: #f5b301;
+}
+
+.fav-toggle:active {
+  transform: scale(0.85);
+}
+
+.fav-toggle.on {
+  color: #f5b301;
+}
+
+.tab-star {
+  color: #f5b301;
+  margin-right: 3px;
+}
+
 .apt-photo {
   width: 112px;
   height: 76px;

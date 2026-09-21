@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { areasWithPyeong } from '../utils/areaType';
 
-function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
+function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading, isFavorite, onToggleFavorite }) {
   const info = apartment.naverInfo;
   const [photoOpen, setPhotoOpen] = useState(false);
 
@@ -10,6 +10,16 @@ function ApartmentCard({ apartment, dealCount, leaseCount, listingsLoading }) {
       <div className="apt-card-header">
         <div className="apt-card-title">
           <h2>{apartment.name}</h2>
+          <button
+            type="button"
+            className={`fav-toggle ${isFavorite ? 'on' : ''}`}
+            onClick={onToggleFavorite}
+            aria-pressed={isFavorite}
+            aria-label={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+            title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+          >
+            {isFavorite ? '★' : '☆'}
+          </button>
           <span className="apt-location">{apartment.gu} {apartment.dong}</span>
         </div>
         <img
