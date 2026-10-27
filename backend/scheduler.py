@@ -103,6 +103,8 @@ def refresh_all() -> bool:
         logger.info(f"[scheduler] === Refresh complete in {elapsed:.1f}s ===")
         return True
     finally:
+        from services.naver_land import close_browser
+        close_browser()
         _is_refreshing = False
         cache.release_lock("refresh")
 
@@ -151,7 +153,7 @@ def start_manual_refresh(apt_id: str) -> str:
 
     def _run():
         global _manual_running
-        from services.naver_land import _fetch_listings_old_domain, _write_cache
+        from services.naver_land import _fetch_listings_old_domain, _write_cache, close_browser
         from services.public_data import get_transactions
 
         count = 0
@@ -174,6 +176,7 @@ def start_manual_refresh(apt_id: str) -> str:
         except Exception as e:
             logger.error(f"[manual] {apt_id} error: {e}")
         finally:
+            close_browser()
             with _manual_lock:
                 _manual_last[apt_id] = {"at": time.time(), "ok": count > 0, "listings": count}
                 _manual_running = None

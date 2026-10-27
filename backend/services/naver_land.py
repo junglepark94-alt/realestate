@@ -49,6 +49,31 @@ def _ensure_browser():
     return _browser_instance
 
 
+def close_browser():
+    """Shut down Chromium after a refresh so it doesn't hold memory all day.
+
+    Must be called from the thread that launched the browser (Playwright sync
+    API is thread-bound); calls from other threads are ignored.
+    """
+    global _pw_instance, _browser_instance, _pw_thread_id
+    with _lock:
+        if _pw_instance is None or _pw_thread_id != threading.get_ident():
+            return
+        try:
+            if _browser_instance:
+                _browser_instance.close()
+        except Exception as e:
+            logger.warning(f"[browser] close failed: {e}")
+        try:
+            _pw_instance.stop()
+        except Exception as e:
+            logger.warning(f"[browser] playwright stop failed: {e}")
+        _pw_instance = None
+        _browser_instance = None
+        _pw_thread_id = None
+        logger.info("[browser] Chromium closed")
+
+
 def _make_page():
     browser = _ensure_browser()
     ctx = browser.new_context(
